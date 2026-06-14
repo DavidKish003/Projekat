@@ -1,0 +1,153 @@
+﻿@model System.Data.DataTable
+
+@{
+    ViewBag.Title = "Prijave kandidata";
+}
+
+<div class="d-flex justify-content-between">
+    <h2>Prijave kandidata</h2>
+
+    <a class="btn btn-success"
+       href="@Url.Action("Dodaj", "Zahtev")">
+        Nova prijava
+    </a>
+</div>
+
+<form method="get"
+      action="@Url.Action("Index", "Zahtev")"
+      class="row my-3">
+
+    <div class="col-md-6">
+        <input class="form-control"
+               name="pretraga"
+               placeholder="Ime, e-mail ili konkurs" />
+    </div>
+
+    <div class="col-md-3">
+        <select class="form-control" name="status">
+            <option value="">Svi statusi</option>
+            <option value="Primljena">Primljena</option>
+            <option value="U razmatranju">U razmatranju</option>
+            <option value="Izabran">Izabran</option>
+            <option value="Odbijen">Odbijen</option>
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary">
+            Pretraži
+        </button>
+    </div>
+</form>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Kandidat</th>
+            <th>Konkurs</th>
+            <th>Datum</th>
+            <th>Status</th>
+            <th>Akcije</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (System.Data.DataRow red in Model.Rows)
+        {
+            var zahtevId = red["ZahtevID"];
+
+            <tr>
+                <td>
+                    @red["ImePrezime"]
+                    <br />
+                    <small>@red["Email"]</small>
+                </td>
+
+                <td>@red["NazivKonkursa"]</td>
+
+                <td>
+                    @Convert.ToDateTime(red["DatumPodnosenja"]).ToString("dd.MM.yyyy")
+                </td>
+
+                <td>
+                    <strong>@red["StatusZahteva"]</strong>
+                </td>
+
+                <td>
+                    <a href="@Url.Action("Detalji", "Zahtev", new { id = zahtevId })">
+                        Detalji
+                    </a>
+
+                    |
+
+                    <a href="@Url.Action("Izmeni", "Zahtev", new { id = zahtevId })">
+                        Izmeni
+                    </a>
+
+                    |
+
+                    @using (Html.BeginForm(
+                     "Prihvati",
+                     "Zahtev",
+                     FormMethod.Post,
+                     new { style = "display:inline;" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden"
+                                               name="id"
+                                               value="@zahtevId" />
+
+                                        <button type="submit"
+                                                class="btn btn-link text-success p-0"
+                                                onclick="return confirm('Da li sigurno želite da izaberete ovog kandidata?');">
+                                            Prihvati
+                                        </button>
+                    }
+
+                    |
+
+                    @using (Html.BeginForm(
+                        "Odbij",
+                        "Zahtev",
+                        FormMethod.Post,
+                        new { style = "display:inline;" }))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               name="id"
+                               value="@zahtevId" />
+
+                        <button type="submit"
+                                class="btn btn-link text-danger p-0"
+                                onclick="return confirm('Da li sigurno želite da odbijete ovu prijavu?');">
+                            Odbij
+                        </button>
+                    }
+
+                    |
+
+                    @using (Html.BeginForm(
+                        "Obrisi",
+                        "Zahtev",
+                        FormMethod.Post,
+                        new { style = "display:inline;" }))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               name="id"
+                               value="@zahtevId" />
+
+                        <button type="submit"
+                                class="btn btn-link text-danger p-0"
+                                onclick="return confirm('Da li sigurno želite trajno da obrišete ovu prijavu? Ova radnja se ne može poništiti.');">
+                            Obriši
+                        </button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,1 @@
+﻿<%@ WebService Language="C#" CodeBehind="OgranicenjaZaposljavanja.asmx.cs" Class="KadrovskiPodaci.OgranicenjaZaposljavanja" %>

@@ -1,0 +1,32 @@
+﻿USE KonkursiZaPosao;
+GO
+CREATE OR ALTER PROCEDURE dbo.DajSveZahteveZaRegistraciju AS SELECT * FROM dbo.PrijavaKandidata ORDER BY DatumPodnosenja DESC;
+GO
+CREATE OR ALTER PROCEDURE dbo.DajZahteveZaRegistracijuSaFilterom @Filter NVARCHAR(150) AS
+SELECT * FROM dbo.PrijavaKandidata WHERE ImePrezime LIKE N'%'+@Filter+N'%' OR NazivKonkursa LIKE N'%'+@Filter+N'%' OR Email LIKE N'%'+@Filter+N'%' ORDER BY DatumPodnosenja DESC;
+GO
+CREATE OR ALTER PROCEDURE dbo.DajZahtevZaRegistracijuPoID @ZahtevID INT AS SELECT * FROM dbo.PrijavaKandidata WHERE ZahtevID=@ZahtevID;
+GO
+CREATE OR ALTER PROCEDURE dbo.DajZahtevZaRegistracijuSaDokumentacijom @ZahtevID INT AS
+SELECT p.*,d.DokumentacijaID,d.TipDokumentaID,t.Naziv NazivDokumenta,t.Obavezan,d.Dostavljen,d.Napomena
+FROM dbo.PrijavaKandidata p LEFT JOIN dbo.DokumentacijaPrijave d ON p.ZahtevID=d.ZahtevID LEFT JOIN dbo.TipDokumenta t ON d.TipDokumentaID=t.TipDokumentaID
+WHERE p.ZahtevID=@ZahtevID;
+GO
+CREATE OR ALTER PROCEDURE dbo.DodajNoviZahtevZaRegistraciju
+ @ImePrezime NVARCHAR(100),@Email NVARCHAR(100),@KontaktTelefon NVARCHAR(20),@NazivKonkursa NVARCHAR(150),@StepenObrazovanja NVARCHAR(80),@GodineIskustva INT,@MotivacionoPismo NVARCHAR(MAX),@DatumPodnosenja DATE,@RokKonkursa DATE,@StatusZahteva NVARCHAR(30),@IspunjavaOsnovneUslove BIT AS
+BEGIN INSERT dbo.PrijavaKandidata VALUES(@ImePrezime,@Email,@KontaktTelefon,@NazivKonkursa,@StepenObrazovanja,@GodineIskustva,@MotivacionoPismo,@DatumPodnosenja,@RokKonkursa,@StatusZahteva,@IspunjavaOsnovneUslove); SELECT SCOPE_IDENTITY(); END;
+GO
+CREATE OR ALTER PROCEDURE dbo.IzmeniZahtevZaRegistraciju
+ @ZahtevID INT,@ImePrezime NVARCHAR(100),@Email NVARCHAR(100),@KontaktTelefon NVARCHAR(20),@NazivKonkursa NVARCHAR(150),@StepenObrazovanja NVARCHAR(80),@GodineIskustva INT,@MotivacionoPismo NVARCHAR(MAX),@DatumPodnosenja DATE,@RokKonkursa DATE,@StatusZahteva NVARCHAR(30),@IspunjavaOsnovneUslove BIT AS
+UPDATE dbo.PrijavaKandidata SET ImePrezime=@ImePrezime,Email=@Email,KontaktTelefon=@KontaktTelefon,NazivKonkursa=@NazivKonkursa,StepenObrazovanja=@StepenObrazovanja,GodineIskustva=@GodineIskustva,MotivacionoPismo=@MotivacionoPismo,DatumPodnosenja=@DatumPodnosenja,RokKonkursa=@RokKonkursa,StatusZahteva=@StatusZahteva,IspunjavaOsnovneUslove=@IspunjavaOsnovneUslove WHERE ZahtevID=@ZahtevID;
+GO
+CREATE OR ALTER PROCEDURE dbo.ObrisiZahtevZaRegistraciju @ZahtevID INT AS DELETE dbo.PrijavaKandidata WHERE ZahtevID=@ZahtevID;
+GO
+CREATE OR ALTER PROCEDURE dbo.PromeniStatusZahteva @ZahtevID INT,@StatusZahteva NVARCHAR(30) AS UPDATE dbo.PrijavaKandidata SET StatusZahteva=@StatusZahteva WHERE ZahtevID=@ZahtevID;
+GO
+CREATE OR ALTER PROCEDURE dbo.DodajDokumentacijuZahteva @ZahtevID INT,@TipDokumentaID INT,@Dostavljen BIT,@Napomena NVARCHAR(200) AS INSERT dbo.DokumentacijaPrijave VALUES(@ZahtevID,@TipDokumentaID,@Dostavljen,@Napomena);
+GO
+CREATE OR ALTER PROCEDURE dbo.ObrisiDokumentacijuZaZahtev @ZahtevID INT AS DELETE dbo.DokumentacijaPrijave WHERE ZahtevID=@ZahtevID;
+GO
+CREATE OR ALTER PROCEDURE dbo.DajKorisnikaPoKorisnickomImenuILozinci @KorisnickoIme NVARCHAR(50),@Lozinka NVARCHAR(100) AS SELECT * FROM dbo.Korisnici WHERE KorisnickoIme=@KorisnickoIme AND Lozinka=@Lozinka;
+GO

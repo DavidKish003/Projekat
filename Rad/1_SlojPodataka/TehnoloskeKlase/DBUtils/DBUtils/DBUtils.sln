@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBUtils", "DBUtils\DBUtils.csproj", "{608C9905-AD39-4AAC-A050-354C3E6C36CD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{608C9905-AD39-4AAC-A050-354C3E6C36CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{608C9905-AD39-4AAC-A050-354C3E6C36CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{608C9905-AD39-4AAC-A050-354C3E6C36CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{608C9905-AD39-4AAC-A050-354C3E6C36CD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

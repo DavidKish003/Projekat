@@ -1,0 +1,54 @@
+﻿IF DB_ID(N'KonkursiZaPosao') IS NULL
+    CREATE DATABASE KonkursiZaPosao;
+GO
+USE KonkursiZaPosao;
+GO
+
+IF OBJECT_ID('dbo.DokumentacijaPrijave','U') IS NOT NULL DROP TABLE dbo.DokumentacijaPrijave;
+IF OBJECT_ID('dbo.PrijavaKandidata','U') IS NOT NULL DROP TABLE dbo.PrijavaKandidata;
+IF OBJECT_ID('dbo.TipDokumenta','U') IS NOT NULL DROP TABLE dbo.TipDokumenta;
+IF OBJECT_ID('dbo.Korisnici','U') IS NOT NULL DROP TABLE dbo.Korisnici;
+GO
+
+CREATE TABLE dbo.Korisnici(
+ KorisnikID INT IDENTITY PRIMARY KEY,
+ KorisnickoIme NVARCHAR(50) NOT NULL UNIQUE,
+ Lozinka NVARCHAR(100) NOT NULL,
+ Uloga NVARCHAR(20) NOT NULL
+);
+
+CREATE TABLE dbo.TipDokumenta(
+ TipDokumentaID INT IDENTITY PRIMARY KEY,
+ Naziv NVARCHAR(100) NOT NULL,
+ Obavezan BIT NOT NULL
+);
+
+CREATE TABLE dbo.PrijavaKandidata(
+ ZahtevID INT IDENTITY PRIMARY KEY,
+ ImePrezime NVARCHAR(100) NOT NULL,
+ Email NVARCHAR(100) NOT NULL,
+ KontaktTelefon NVARCHAR(20) NOT NULL,
+ NazivKonkursa NVARCHAR(150) NOT NULL,
+ StepenObrazovanja NVARCHAR(80) NOT NULL,
+ GodineIskustva INT NOT NULL,
+ MotivacionoPismo NVARCHAR(MAX) NULL,
+ DatumPodnosenja DATE NOT NULL,
+ RokKonkursa DATE NOT NULL,
+ StatusZahteva NVARCHAR(30) NOT NULL,
+ IspunjavaOsnovneUslove BIT NOT NULL DEFAULT(0)
+);
+
+CREATE TABLE dbo.DokumentacijaPrijave(
+ DokumentacijaID INT IDENTITY PRIMARY KEY,
+ ZahtevID INT NOT NULL REFERENCES dbo.PrijavaKandidata(ZahtevID) ON DELETE CASCADE,
+ TipDokumentaID INT NOT NULL REFERENCES dbo.TipDokumenta(TipDokumentaID),
+ Dostavljen BIT NOT NULL,
+ Napomena NVARCHAR(200) NULL
+);
+GO
+
+INSERT dbo.Korisnici(KorisnickoIme,Lozinka,Uloga) VALUES
+(N'admin',N'admin',N'Administrator'),(N'hr',N'hr',N'HR');
+INSERT dbo.TipDokumenta(Naziv,Obavezan) VALUES
+(N'Biografija (CV)',1),(N'Motivaciono pismo',0),(N'Diploma ili potvrda o obrazovanju',1),(N'Preporuka prethodnog poslodavca',0);
+GO

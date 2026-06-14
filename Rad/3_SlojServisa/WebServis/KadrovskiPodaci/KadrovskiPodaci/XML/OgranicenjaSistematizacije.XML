@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" standalone="yes"?>
+<SpisakOgranicenja>
+  <OgranicenjeZvanja>
+    <SifraZvanja>d</SifraZvanja>
+    <MaxBrNastavnika>3</MaxBrNastavnika>
+  </OgranicenjeZvanja>
+<OgranicenjeZvanja>
+    <SifraZvanja>v</SifraZvanja>
+    <MaxBrNastavnika>3</MaxBrNastavnika>
+  </OgranicenjeZvanja>
+<OgranicenjeZvanja>
+    <SifraZvanja>r</SifraZvanja>
+    <MaxBrNastavnika>3</MaxBrNastavnika>
+  </OgranicenjeZvanja>
+</SpisakOgranicenja>
