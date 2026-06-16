@@ -7,13 +7,21 @@ namespace PrezentacionaLogika
     {
         public int ZahtevID { get; set; }
 
-        public string ImePrezime { get; set; }
+    public string ImePrezime { get; set; }
 
         public string Email { get; set; }
 
         public string KontaktTelefon { get; set; }
 
+        public string PoslednjaSkola { get; set; }
+
+        public string MestoSkole { get; set; }
+
+        public string Zanimanje { get; set; }
+
         public string NazivKonkursa { get; set; }
+
+        public string RadnoMesto { get; set; }
 
         public string StepenObrazovanja { get; set; }
 
@@ -29,6 +37,12 @@ namespace PrezentacionaLogika
 
         public bool IspunjavaOsnovneUslove { get; set; }
 
-        public List<DokumentacijaViewModel> Dokumentacija { get; set; }
+        public List<DokumentacijaViewModel> Dokumentacija
+        {
+            get;
+            set;
+        }
     }
+
+
 }

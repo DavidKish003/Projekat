@@ -1,0 +1,463 @@
+﻿@{
+ViewBag.Title = "Kontakt";
+
+
+bool korisnikJePrijavljen =
+    Session["KorisnikID"] != null;
+
+string uloga =
+    Convert.ToString(
+        Session["Uloga"]
+    );
+
+bool korisnikJeAdministrator =
+    string.Equals(
+        uloga,
+        "Admin",
+        StringComparison.OrdinalIgnoreCase
+    )
+    ||
+    string.Equals(
+        uloga,
+        "Administrator",
+        StringComparison.OrdinalIgnoreCase
+    );
+
+string kontrolerZaPregled =
+    korisnikJePrijavljen
+        ? "Zahtev"
+        : "Login";
+
+string akcijaZaPregled =
+    !korisnikJePrijavljen
+        ? "Index"
+        : korisnikJeAdministrator
+            ? "Index"
+            : "MojePrijave";
+
+
+}
+
+<style>
+    .stranica-kontakta {
+        max-width: 1050px;
+        margin: 35px auto;
+        color: #1e293b;
+    }
+
+    .zaglavlje-kontakta {
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 27px;
+        padding: 42px 38px;
+        border-radius: 22px;
+        background: linear-gradient( 135deg, #172554 0%, #1e3a8a 58%, #0369a1 100% );
+        color: #ffffff;
+        box-shadow: 0 16px 38px rgba(15, 23, 42, 0.17);
+    }
+
+        .zaglavlje-kontakta::after {
+            content: "";
+            position: absolute;
+            top: -110px;
+            right: -75px;
+            width: 270px;
+            height: 270px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+    .sadrzaj-zaglavlja {
+        position: relative;
+        z-index: 1;
+        max-width: 760px;
+    }
+
+    .oznaka-kontakta {
+        display: inline-block;
+        margin-bottom: 13px;
+        padding: 7px 13px;
+        border: 1px solid rgba(255, 255, 255, 0.27);
+        border-radius: 30px;
+        background: rgba(255, 255, 255, 0.08);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+    }
+
+    .naslov-kontakta {
+        margin: 0 0 13px;
+        font-size: 37px;
+        font-weight: 700;
+    }
+
+    .opis-kontakta {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 16px;
+        line-height: 1.7;
+    }
+
+    .mreza-kontakta {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 22px;
+        margin-bottom: 26px;
+    }
+
+    .kartica-kontakta {
+        padding: 28px;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 9px 27px rgba(15, 23, 42, 0.06);
+    }
+
+    .naslov-kartice {
+        margin: 0 0 20px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid #e2e8f0;
+        color: #0f172a;
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .red-kontakta {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 12px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+        .red-kontakta:last-child {
+            border-bottom: none;
+        }
+
+    .naziv-podatka {
+        color: #64748b;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .vrednost-podatka {
+        max-width: 65%;
+        color: #1e293b;
+        text-align: right;
+        font-size: 14px;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+    }
+
+        .vrednost-podatka a {
+            color: #1d4ed8;
+            text-decoration: none;
+        }
+
+            .vrednost-podatka a:hover {
+                text-decoration: underline;
+            }
+
+    .spisak-funkcija {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .stavka-funkcije {
+        position: relative;
+        margin-bottom: 12px;
+        padding: 12px 14px 12px 43px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        background: #f8fafc;
+        color: #475569;
+        font-size: 14px;
+        line-height: 1.55;
+    }
+
+        .stavka-funkcije::before {
+            content: "✓";
+            position: absolute;
+            top: 11px;
+            left: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 21px;
+            height: 21px;
+            border-radius: 50%;
+            background: #dcfce7;
+            color: #166534;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+    .poruka-uspeha {
+        margin-bottom: 25px;
+        padding: 18px 21px;
+        border: 1px solid #bbf7d0;
+        border-radius: 13px;
+        background: #f0fdf4;
+        color: #166534;
+        text-align: center;
+        font-weight: 600;
+        line-height: 1.65;
+    }
+
+    .dugmad-kontakta {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .dugme-kontakta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 45px;
+        padding: 11px 21px;
+        border-radius: 9px;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: 0.2s ease;
+    }
+
+        .dugme-kontakta:hover {
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+
+    .dugme-prijave {
+        background: #2563eb;
+        color: #ffffff;
+    }
+
+        .dugme-prijave:hover {
+            background: #1d4ed8;
+            color: #ffffff;
+        }
+
+    .dugme-o-sistemu {
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        color: #475569;
+    }
+
+        .dugme-o-sistemu:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+    @@media (max-width: 760px) {
+        .mreza-kontakta {
+            grid-template-columns: 1fr;
+        }
+
+        .red-kontakta {
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .vrednost-podatka {
+            max-width: 100%;
+            text-align: left;
+        }
+    }
+
+    @@media (max-width: 600px) {
+        .stranica-kontakta {
+            margin-top: 20px;
+        }
+
+        .zaglavlje-kontakta {
+            padding: 31px 24px;
+        }
+
+        .naslov-kontakta {
+            font-size: 30px;
+        }
+
+        .kartica-kontakta {
+            padding: 22px;
+        }
+
+        .dugmad-kontakta {
+            flex-direction: column;
+        }
+
+        .dugme-kontakta {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="stranica-kontakta">
+
+
+    <div class="zaglavlje-kontakta">
+
+        <div class="sadrzaj-zaglavlja">
+
+            <span class="oznaka-kontakta">
+                Kontakt i podr&#353;ka
+            </span>
+
+            <h1 class="naslov-kontakta">
+                Informacije o projektu
+            </h1>
+
+            <p class="opis-kontakta">
+                Za pitanja u vezi sa kori&#353;&#263;enjem aplikacije,
+                prijavljivanjem na sistem ili obradom prijava mo&#382;ete
+                kontaktirati autora projekta.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="mreza-kontakta">
+
+        <div class="kartica-kontakta">
+
+            <h2 class="naslov-kartice">
+                Kontakt informacije
+            </h2>
+
+            <div class="red-kontakta">
+
+                <span class="naziv-podatka">
+                    Autor projekta
+                </span>
+
+                <span class="vrednost-podatka">
+                    David Ki&#353;
+                </span>
+
+            </div>
+
+            <div class="red-kontakta">
+
+                <span class="naziv-podatka">
+                    Fakultet
+                </span>
+
+                <span class="vrednost-podatka">
+                    Tehni&#269;ki fakultet „Mihajlo Pupin“
+                </span>
+
+            </div>
+
+            <div class="red-kontakta">
+
+                <span class="naziv-podatka">
+                    Mesto
+                </span>
+
+                <span class="vrednost-podatka">
+                    Zrenjanin
+                </span>
+
+            </div>
+
+            <div class="red-kontakta">
+
+                <span class="naziv-podatka">
+                    E-mail
+                </span>
+
+                <span class="vrednost-podatka">
+                    <a href="mailto:kontrash297@gmail.com">
+                        kontrash297@gmail.com
+                    </a>
+                </span>
+
+            </div>
+
+            <div class="red-kontakta">
+
+                <span class="naziv-podatka">
+                    Predmet
+                </span>
+
+                <span class="vrednost-podatka">
+                    Razvoj vi&#353;eslojnog softvera
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="kartica-kontakta">
+
+            <h2 class="naslov-kartice">
+                Funkcionalnosti sistema
+            </h2>
+
+            <ul class="spisak-funkcija">
+
+                <li class="stavka-funkcije">
+                    Registracija i prijavljivanje korisnika
+                </li>
+
+                <li class="stavka-funkcije">
+                    Podno&#353;enje prijave na konkurs za posao
+                </li>
+
+                <li class="stavka-funkcije">
+                    Pregled sopstvenih prijava kandidata
+                </li>
+
+                <li class="stavka-funkcije">
+                    Administratorski pregled svih prijava
+                </li>
+
+                <li class="stavka-funkcije">
+                    Izmena, prihvatanje, odbijanje i brisanje prijave
+                </li>
+
+                <li class="stavka-funkcije">
+                    Automatska primena poslovnog pravila
+                </li>
+
+                <li class="stavka-funkcije">
+                    Pregled i &#353;tampanje detalja prijave
+                </li>
+
+            </ul>
+
+        </div>
+
+    </div>
+
+    <div class="poruka-uspeha">
+        Sistem za prijavu kandidata realizovan je kori&#353;&#263;enjem
+        ASP.NET MVC arhitekture, vi&#353;eslojnog pristupa, REST servisa,
+        Entity Frameworka, stored procedura i XML parametrizacije.
+    </div>
+
+    <div class="dugmad-kontakta">
+
+        <a class="dugme-kontakta dugme-prijave"
+           href="@Url.Action(
+           akcijaZaPregled,
+           kontrolerZaPregled)">
+            @(korisnikJePrijavljen
+            ? "Pogledaj prijave"
+            : "Prijavi se na sistem")
+        </a>
+
+        <a class="dugme-kontakta dugme-o-sistemu"
+           href="@Url.Action("About", "Home")">
+            O sistemu
+        </a>
+
+    </div>
+
+
+</div>

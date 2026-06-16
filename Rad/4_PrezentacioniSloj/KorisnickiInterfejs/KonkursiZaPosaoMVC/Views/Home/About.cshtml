@@ -1,0 +1,489 @@
+﻿@{
+ViewBag.Title = "O sistemu";
+
+bool korisnikJePrijavljen =
+    Session["KorisnikID"] != null;
+
+string uloga =
+    Convert.ToString(
+        Session["Uloga"]
+    );
+
+bool korisnikJeAdministrator =
+    string.Equals(
+        uloga,
+        "Admin",
+        StringComparison.OrdinalIgnoreCase
+    )
+    ||
+    string.Equals(
+        uloga,
+        "Administrator",
+        StringComparison.OrdinalIgnoreCase
+    );
+
+string kontrolerZaPregled =
+    korisnikJePrijavljen
+        ? "Zahtev"
+        : "Login";
+
+string akcijaZaPregled =
+    !korisnikJePrijavljen
+        ? "Index"
+        : korisnikJeAdministrator
+            ? "Index"
+            : "MojePrijave";
+
+
+}
+
+<style>
+    .stranica-o-sistemu {
+        max-width: 1180px;
+        margin: 35px auto;
+        color: #1e293b;
+    }
+
+    .zaglavlje-sistema {
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 28px;
+        padding: 45px 40px;
+        border-radius: 22px;
+        background: linear-gradient( 135deg, #0f172a 0%, #1e3a5f 58%, #0f766e 100% );
+        color: #ffffff;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.17);
+    }
+
+        .zaglavlje-sistema::after {
+            content: "";
+            position: absolute;
+            top: -120px;
+            right: -90px;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+    .sadrzaj-zaglavlja {
+        position: relative;
+        z-index: 1;
+        max-width: 820px;
+    }
+
+    .oznaka-projekta {
+        display: inline-block;
+        margin-bottom: 14px;
+        padding: 7px 13px;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        border-radius: 30px;
+        background: rgba(255, 255, 255, 0.08);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+    }
+
+    .naslov-sistema {
+        margin: 0 0 15px;
+        font-size: 39px;
+        font-weight: 700;
+    }
+
+    .opis-sistema {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 17px;
+        line-height: 1.75;
+    }
+
+    .mreza-kartica {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 22px;
+        margin-bottom: 28px;
+    }
+
+    .kartica-sistema {
+        padding: 27px;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 9px 27px rgba(15, 23, 42, 0.06);
+    }
+
+    .broj-kartice {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 43px;
+        height: 43px;
+        margin-bottom: 17px;
+        border-radius: 12px;
+        background: #ecfdf5;
+        color: #047857;
+        font-size: 17px;
+        font-weight: 700;
+    }
+
+    .naslov-kartice {
+        margin: 0 0 13px;
+        color: #0f172a;
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .tekst-kartice {
+        margin: 0;
+        color: #64748b;
+        font-size: 14px;
+        line-height: 1.75;
+    }
+
+    .spisak-tehnologija {
+        margin: 0;
+        padding-left: 20px;
+        color: #475569;
+        line-height: 1.9;
+    }
+
+        .spisak-tehnologija li::marker {
+            color: #0f766e;
+        }
+
+    .okvir-poslovnog-pravila {
+        margin-bottom: 28px;
+        padding: 27px;
+        border: 1px solid #bae6fd;
+        border-radius: 18px;
+        background: #f0f9ff;
+    }
+
+    .naslov-poslovnog-pravila {
+        margin: 0 0 16px;
+        color: #075985;
+        font-size: 21px;
+        font-weight: 700;
+    }
+
+    .koraci-pravila {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 15px;
+    }
+
+    .korak-pravila {
+        padding: 18px;
+        border: 1px solid #bae6fd;
+        border-radius: 12px;
+        background: #ffffff;
+    }
+
+    .naziv-koraka {
+        display: block;
+        margin-bottom: 7px;
+        color: #0f172a;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .opis-koraka {
+        margin: 0;
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .status-odbijena {
+        color: #b91c1c;
+    }
+
+    .status-razmatranje {
+        color: #b45309;
+    }
+
+    .status-primljena {
+        color: #1d4ed8;
+    }
+
+    .napomena-projekta {
+        margin-bottom: 26px;
+        padding: 18px 21px;
+        border: 1px solid #bbf7d0;
+        border-radius: 13px;
+        background: #f0fdf4;
+        color: #166534;
+        line-height: 1.7;
+    }
+
+    .dugmad-stranice {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .dugme-stranice {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 45px;
+        padding: 11px 21px;
+        border-radius: 9px;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: 0.2s ease;
+    }
+
+        .dugme-stranice:hover {
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+
+    .dugme-pregled {
+        background: #0f766e;
+        color: #ffffff;
+    }
+
+        .dugme-pregled:hover {
+            background: #115e59;
+            color: #ffffff;
+        }
+
+    .dugme-kontakt {
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        color: #475569;
+    }
+
+        .dugme-kontakt:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+    @@media (max-width: 850px) {
+        .mreza-kartica,
+        .koraci-pravila {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 600px) {
+        .stranica-o-sistemu {
+            margin-top: 20px;
+        }
+
+        .zaglavlje-sistema {
+            padding: 31px 24px;
+        }
+
+        .naslov-sistema {
+            font-size: 30px;
+        }
+
+        .kartica-sistema,
+        .okvir-poslovnog-pravila {
+            padding: 22px;
+        }
+
+        .dugmad-stranice {
+            flex-direction: column;
+        }
+
+        .dugme-stranice {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="stranica-o-sistemu">
+
+
+    <div class="zaglavlje-sistema">
+
+        <div class="sadrzaj-zaglavlja">
+
+            <span class="oznaka-projekta">
+                Vi&#353;eslojna aplikacija
+            </span>
+
+            <h1 class="naslov-sistema">
+                Sistem za prijavu kandidata
+            </h1>
+
+            <p class="opis-sistema">
+                Aplikacija omogu&#263;ava registraciju korisnika,
+                podno&#353;enje prijava na konkurse za posao,
+                pregled podataka o kandidatima i obradu prijava
+                od strane administratora.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="mreza-kartica">
+
+        <div class="kartica-sistema">
+
+            <div class="broj-kartice">
+                1
+            </div>
+
+            <h2 class="naslov-kartice">
+                Namena sistema
+            </h2>
+
+            <p class="tekst-kartice">
+                Registrovani korisnik mo&#382;e da podnese novu prijavu
+                i pregleda samo svoje prijave. Administrator ima pristup
+                svim prijavama i mo&#382;e da pregleda detalje, menja
+                podatke, izabere ili odbije kandidata i trajno obri&#353;e
+                prijavu.
+            </p>
+
+        </div>
+
+        <div class="kartica-sistema">
+
+            <div class="broj-kartice">
+                2
+            </div>
+
+            <h2 class="naslov-kartice">
+                Evidencija podataka
+            </h2>
+
+            <p class="tekst-kartice">
+                Za svakog kandidata evidentiraju se li&#269;ni i kontakt
+                podaci, poslednja zavr&#353;ena &#353;kola, mesto &#353;kole,
+                ste&#269;eno zanimanje, stepen obrazovanja, radno mesto,
+                godine iskustva, rok konkursa i dostavljena dokumentacija.
+            </p>
+
+        </div>
+
+        <div class="kartica-sistema">
+
+            <div class="broj-kartice">
+                3
+            </div>
+
+            <h2 class="naslov-kartice">
+                Vi&#353;eslojna arhitektura
+            </h2>
+
+            <p class="tekst-kartice">
+                Sistem je organizovan kroz sloj za rad sa podacima,
+                REST servisni sloj, sloj poslovne logike i prezentacioni
+                MVC sloj sa ViewModel klasama. Slojevi su realizovani
+                kao odvojeni projekti i biblioteke klasa.
+            </p>
+
+        </div>
+
+        <div class="kartica-sistema">
+
+            <div class="broj-kartice">
+                4
+            </div>
+
+            <h2 class="naslov-kartice">
+                Tehnologije
+            </h2>
+
+            <ul class="spisak-tehnologija">
+                <li>ASP.NET MVC 5 i .NET Framework 4.8</li>
+                <li>ASP.NET Web API REST servis</li>
+                <li>Microsoft SQL Server</li>
+                <li>SQL Client i stored procedure</li>
+                <li>Entity Framework 6</li>
+                <li>DBUtils.TabelaKlasa i SQL upiti</li>
+                <li>Repository obrazac</li>
+                <li>XML parametrizacija poslovnog pravila</li>
+            </ul>
+
+        </div>
+
+    </div>
+
+    <div class="okvir-poslovnog-pravila">
+
+        <h2 class="naslov-poslovnog-pravila">
+            Poslovno pravilo za automatsku obradu prijave
+        </h2>
+
+        <div class="koraci-pravila">
+
+            <div class="korak-pravila">
+
+                <strong class="naziv-koraka status-odbijena">
+                    Status: Odbijena
+                </strong>
+
+                <p class="opis-koraka">
+                    Ako je datum podno&#353;enja prijave posle roka
+                    konkursa, prijava se automatski odbija.
+                </p>
+
+            </div>
+
+            <div class="korak-pravila">
+
+                <strong class="naziv-koraka status-razmatranje">
+                    Status: U razmatranju
+                </strong>
+
+                <p class="opis-koraka">
+                    Ako je prijava podneta u roku i ste&#269;eno zanimanje
+                    kandidata odgovara izabranom radnom mestu, prijava
+                    se automatski stavlja u razmatranje.
+                </p>
+
+            </div>
+
+            <div class="korak-pravila">
+
+                <strong class="naziv-koraka status-primljena">
+                    Status: Primljena
+                </strong>
+
+                <p class="opis-koraka">
+                    Ako je prijava podneta u roku, ali zanimanje nije
+                    evidentirano kao odgovaraju&#263;e radnom mestu,
+                    prijava ostaje primljena radi ru&#269;ne procene.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="napomena-projekta">
+        Sistem je izra&#273;en kao projekat iz predmeta
+        <strong>Razvoj vi&#353;eslojnog softvera</strong> na
+        Tehni&#269;kom fakultetu „Mihajlo Pupin“ u Zrenjaninu.
+    </div>
+
+    <div class="dugmad-stranice">
+
+        <a class="dugme-stranice dugme-pregled"
+           href="@Url.Action(
+           akcijaZaPregled,
+           kontrolerZaPregled)">
+            @(korisnikJePrijavljen
+            ? "Pogledaj prijave"
+            : "Prijavi se na sistem")
+        </a>
+
+        <a class="dugme-stranice dugme-kontakt"
+           href="@Url.Action("Contact", "Home")">
+            Kontakt i podr&#353;ka
+        </a>
+
+    </div>
+
+
+</div>

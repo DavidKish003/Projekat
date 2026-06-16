@@ -1,0 +1,1108 @@
+﻿@model PrezentacionaLogika.ZahtevViewModel
+
+@{
+    ViewBag.Title = "Detalji prijave";
+
+    string statusPrijave =
+        Convert.ToString(Model.StatusZahteva);
+
+    string klasaStatusa =
+        "oznaka-statusa status-nepoznat";
+
+    if (string.Equals(
+        statusPrijave,
+        "Primljena",
+        StringComparison.OrdinalIgnoreCase))
+    {
+        klasaStatusa =
+            "oznaka-statusa status-primljena";
+    }
+    else if (string.Equals(
+        statusPrijave,
+        "U razmatranju",
+        StringComparison.OrdinalIgnoreCase))
+    {
+        klasaStatusa =
+            "oznaka-statusa status-razmatranje";
+    }
+    else if (string.Equals(
+        statusPrijave,
+        "Izabran",
+        StringComparison.OrdinalIgnoreCase))
+    {
+        klasaStatusa =
+            "oznaka-statusa status-izabran";
+    }
+    else if (
+        string.Equals(
+            statusPrijave,
+            "Odbijena",
+            StringComparison.OrdinalIgnoreCase)
+        ||
+        string.Equals(
+            statusPrijave,
+            "Odbijen",
+            StringComparison.OrdinalIgnoreCase))
+    {
+        klasaStatusa =
+            "oznaka-statusa status-odbijena";
+    }
+
+    bool korisnikJeAdministrator =
+        string.Equals(
+            Convert.ToString(Session["Uloga"]),
+            "Admin",
+            StringComparison.OrdinalIgnoreCase
+        )
+        ||
+        string.Equals(
+            Convert.ToString(Session["Uloga"]),
+            "Administrator",
+            StringComparison.OrdinalIgnoreCase
+        );
+
+    string akcijaZaPovratak =
+        korisnikJeAdministrator
+            ? "Index"
+            : "MojePrijave";
+}
+
+<style>
+    .stranica-detalja {
+        max-width: 1050px;
+        margin: 35px auto;
+        color: #1e293b;
+    }
+
+    .zaglavlje-detalja {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 25px;
+        margin-bottom: 25px;
+        padding: 32px;
+        border-radius: 20px;
+        background: linear-gradient( 135deg, #0f172a, #1e3a5f );
+        color: #ffffff;
+        box-shadow: 0 14px 35px rgba(15, 23, 42, 0.16);
+    }
+
+    .mali-naslov {
+        margin-bottom: 8px;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    .ime-kandidata {
+        margin: 0 0 10px;
+        font-size: 34px;
+        font-weight: 700;
+    }
+
+    .naziv-konkursa-zaglavlje {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 17px;
+        line-height: 1.5;
+    }
+
+    .oznaka-statusa {
+        display: inline-block;
+        min-width: 120px;
+        padding: 10px 16px;
+        border-radius: 30px;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .status-primljena {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .status-razmatranje {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-izabran {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-odbijena {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .status-nepoznat {
+        background: #e2e8f0;
+        color: #475569;
+    }
+
+    .mreza-podataka {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 22px;
+        margin-bottom: 25px;
+    }
+
+    .kartica-podataka {
+        padding: 25px;
+        border: 1px solid #e2e8f0;
+        border-radius: 17px;
+        background: #ffffff;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .naslov-kartice {
+        margin: 0 0 20px;
+        padding-bottom: 13px;
+        border-bottom: 1px solid #e2e8f0;
+        color: #0f172a;
+        font-size: 19px;
+        font-weight: 700;
+    }
+
+    .red-podatka {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 11px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+        .red-podatka:last-child {
+            border-bottom: none;
+        }
+
+    .naziv-podatka {
+        color: #64748b;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .vrednost-podatka {
+        max-width: 65%;
+        color: #1e293b;
+        text-align: right;
+        font-size: 14px;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+    }
+
+    .uslov-ispunjen {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        background: #dcfce7;
+        color: #166534;
+        font-weight: 700;
+    }
+
+    .uslov-nije-ispunjen {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        background: #fee2e2;
+        color: #991b1b;
+        font-weight: 700;
+    }
+
+    .odeljak-sadrzaja {
+        margin-bottom: 25px;
+        padding: 25px;
+        border: 1px solid #e2e8f0;
+        border-radius: 17px;
+        background: #ffffff;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .tekst-motivacionog-pisma {
+        min-height: 90px;
+        padding: 18px;
+        border-left: 4px solid #0f766e;
+        border-radius: 8px;
+        background: #f8fafc;
+        color: #334155;
+        line-height: 1.75;
+        white-space: pre-line;
+        overflow-wrap: anywhere;
+    }
+
+    .prazan-sadrzaj {
+        color: #64748b;
+        font-style: italic;
+    }
+
+    .spisak-dokumenata {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .stavka-dokumenta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 14px 16px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+        .stavka-dokumenta:last-child {
+            border-bottom: none;
+        }
+
+    .naziv-dokumenta {
+        color: #334155;
+        font-weight: 600;
+    }
+
+    .dokument-dostavljen {
+        padding: 6px 11px;
+        border-radius: 20px;
+        background: #dcfce7;
+        color: #166534;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .dokument-nije-dostavljen {
+        padding: 6px 11px;
+        border-radius: 20px;
+        background: #fee2e2;
+        color: #991b1b;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .dugmad-akcije {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 25px;
+    }
+
+    .dugme-akcije {
+        display: inline-block;
+        padding: 11px 20px;
+        border: none;
+        border-radius: 9px;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+        .dugme-akcije:hover {
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+
+    .dugme-nazad {
+        background: #e2e8f0;
+        color: #334155;
+    }
+
+        .dugme-nazad:hover {
+            background: #cbd5e1;
+            color: #1e293b;
+        }
+
+    .dugme-izmeni {
+        background: #2563eb;
+        color: #ffffff;
+    }
+
+        .dugme-izmeni:hover {
+            background: #1d4ed8;
+            color: #ffffff;
+        }
+
+    .dugme-stampaj {
+        background: #0f766e;
+        color: #ffffff;
+    }
+
+        .dugme-stampaj:hover {
+            background: #115e59;
+            color: #ffffff;
+        }
+
+    .zaglavlje-za-stampu,
+    .podnozje-za-stampu {
+        display: none;
+    }
+
+    @@media (max-width: 768px) {
+        .stranica-detalja {
+            margin-top: 20px;
+        }
+
+        .zaglavlje-detalja {
+            flex-direction: column;
+            padding: 25px;
+        }
+
+        .ime-kandidata {
+            font-size: 28px;
+        }
+
+        .mreza-podataka {
+            grid-template-columns: 1fr;
+        }
+
+        .red-podatka {
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .vrednost-podatka {
+            max-width: 100%;
+            text-align: left;
+        }
+
+        .stavka-dokumenta {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .dugmad-akcije {
+            flex-direction: column;
+        }
+
+            .dugmad-akcije .dugme-akcije {
+                width: 100%;
+                text-align: center;
+                box-sizing: border-box;
+            }
+    }
+
+    @@page {
+        size: A4 portrait;
+        margin: 12mm;
+    }
+
+    @@media print {
+        html,
+        body {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+            color: #000000 !important;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 10.5pt;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        nav,
+        footer,
+        header,
+        .navbar,
+        .dugmad-akcije {
+            display: none !important;
+        }
+
+        .container,
+        .body-content {
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .stranica-detalja {
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            color: #000000 !important;
+        }
+
+        .zaglavlje-za-stampu {
+            display: block !important;
+            margin-bottom: 7mm;
+            padding-bottom: 4mm;
+            border-bottom: 2px solid #000000;
+        }
+
+        .stampano-zaglavlje-gornji-red {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10mm;
+        }
+
+        .stampano-zaglavlje-naslov {
+            margin: 0 0 2mm;
+            color: #000000;
+            font-size: 20pt;
+            font-weight: 700;
+        }
+
+        .stampano-zaglavlje-opis {
+            margin: 0;
+            color: #333333;
+            font-size: 10pt;
+        }
+
+        .stampano-zaglavlje-meta {
+            min-width: 58mm;
+            border-collapse: collapse;
+            font-size: 9.5pt;
+        }
+
+            .stampano-zaglavlje-meta td {
+                padding: 1.2mm 0 1.2mm 4mm;
+                vertical-align: top;
+            }
+
+                .stampano-zaglavlje-meta td:first-child {
+                    padding-left: 0;
+                    color: #555555;
+                    font-weight: 600;
+                    white-space: nowrap;
+                }
+
+                .stampano-zaglavlje-meta td:last-child {
+                    color: #000000;
+                    font-weight: 700;
+                    text-align: right;
+                }
+
+        .zaglavlje-detalja {
+            display: flex !important;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 8mm;
+            margin-bottom: 6mm;
+            padding: 5mm;
+            border: 1px solid #555555;
+            border-radius: 0;
+            background: #ffffff !important;
+            color: #000000 !important;
+            box-shadow: none !important;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .mali-naslov {
+            margin-bottom: 1.5mm;
+            color: #444444 !important;
+            font-size: 8.5pt;
+            letter-spacing: 0.5px;
+        }
+
+        .ime-kandidata {
+            margin-bottom: 1.5mm;
+            color: #000000 !important;
+            font-size: 18pt;
+        }
+
+        .naziv-konkursa-zaglavlje {
+            color: #000000 !important;
+            font-size: 10.5pt;
+        }
+
+        .oznaka-statusa {
+            min-width: 31mm;
+            padding: 2.5mm 4mm;
+            border: 1px solid #444444;
+            border-radius: 0;
+            background: #ffffff !important;
+            color: #000000 !important;
+            font-size: 9.5pt;
+        }
+
+        .mreza-podataka {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 5mm;
+            margin-bottom: 6mm;
+        }
+
+        .kartica-podataka,
+        .odeljak-sadrzaja {
+            margin-bottom: 6mm;
+            padding: 5mm;
+            border: 1px solid #777777;
+            border-radius: 0;
+            background: #ffffff !important;
+            box-shadow: none !important;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .mreza-podataka .kartica-podataka {
+            margin-bottom: 0;
+        }
+
+        .naslov-kartice {
+            margin: 0 0 3mm;
+            padding-bottom: 2mm;
+            border-bottom: 1px solid #555555;
+            color: #000000 !important;
+            font-size: 12.5pt;
+        }
+
+        .red-podatka {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 4mm;
+            padding: 2.2mm 0;
+            border-bottom: 1px solid #dddddd;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .naziv-podatka {
+            color: #444444 !important;
+            font-size: 9.5pt;
+            font-weight: 600;
+        }
+
+        .vrednost-podatka {
+            max-width: 62%;
+            color: #000000 !important;
+            text-align: right !important;
+            font-size: 9.5pt;
+            font-weight: 700;
+        }
+
+        .uslov-ispunjen,
+        .uslov-nije-ispunjen,
+        .dokument-dostavljen,
+        .dokument-nije-dostavljen {
+            padding: 1mm 2.5mm;
+            border: 1px solid #555555;
+            border-radius: 0;
+            background: #ffffff !important;
+            color: #000000 !important;
+            font-size: 9pt;
+        }
+
+        .tekst-motivacionog-pisma {
+            min-height: 25mm;
+            padding: 4mm;
+            border: 1px solid #999999;
+            border-left: 3px solid #000000;
+            border-radius: 0;
+            background: #ffffff !important;
+            color: #000000 !important;
+            font-size: 9.5pt;
+            line-height: 1.5;
+        }
+
+        .spisak-dokumenata {
+            margin: 0;
+            padding: 0;
+        }
+
+        .stavka-dokumenta {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: space-between;
+            gap: 5mm;
+            padding: 2.5mm 1mm;
+            border-bottom: 1px solid #cccccc;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .naziv-dokumenta {
+            color: #000000 !important;
+            font-size: 9.5pt;
+        }
+
+        .prazan-sadrzaj {
+            color: #444444 !important;
+        }
+
+        .podnozje-za-stampu {
+            display: block !important;
+            margin-top: 14mm;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .potpisi-za-stampu {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 25mm;
+            margin-top: 18mm;
+        }
+
+        .potpis-polje {
+            padding-top: 2mm;
+            border-top: 1px solid #000000;
+            text-align: center;
+            font-size: 9.5pt;
+        }
+
+        .napomena-za-stampu {
+            margin-top: 12mm;
+            padding-top: 3mm;
+            border-top: 1px solid #aaaaaa;
+            color: #555555;
+            font-size: 8pt;
+            line-height: 1.4;
+        }
+
+        a[href]::after {
+            content: none !important;
+        }
+    }
+</style>
+
+<div class="stranica-detalja">
+
+    <div class="zaglavlje-za-stampu">
+
+        <div class="stampano-zaglavlje-gornji-red">
+
+            <div>
+
+                <h1 class="stampano-zaglavlje-naslov">
+                    Izveštaj o prijavi kandidata
+                </h1>
+
+                <p class="stampano-zaglavlje-opis">
+                    Sistem za prijavu kandidata i obradu konkursa za posao
+                </p>
+
+            </div>
+
+            <table class="stampano-zaglavlje-meta">
+
+                <tr>
+                    <td>Broj prijave:</td>
+                    <td>@Model.ZahtevID</td>
+                </tr>
+
+                <tr>
+                    <td>Datum štampanja:</td>
+                    <td>
+                        @String.Format(
+                                 "{0:dd.MM.yyyy HH:mm}",
+                                 DateTime.Now
+                             )
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Status:</td>
+                    <td>@statusPrijave</td>
+                </tr>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <div class="zaglavlje-detalja">
+
+        <div>
+
+            <div class="mali-naslov">
+                Detalji prijave kandidata
+            </div>
+
+            <h1 class="ime-kandidata">
+                @Model.ImePrezime
+            </h1>
+
+            <p class="naziv-konkursa-zaglavlje">
+                Konkurs: @Model.NazivKonkursa
+            </p>
+
+        </div>
+
+        <span class="@klasaStatusa">
+            @statusPrijave
+        </span>
+
+    </div>
+
+    <div class="mreza-podataka">
+
+        <div class="kartica-podataka">
+
+            <h2 class="naslov-kartice">
+                Podaci o kandidatu
+            </h2>
+
+            <div class="red-podatka">
+
+                <span class="naziv-podatka">
+                    Ime i prezime
+                </span>
+
+                <span class="vrednost-podatka">
+                    @Model.ImePrezime
+                </span>
+
+            </div>
+
+            <div class="red-podatka">
+
+                <span class="naziv-podatka">
+                    E-mail
+                </span>
+
+                <span class="vrednost-podatka">
+                    @Model.Email
+                </span>
+
+            </div>
+
+            <div class="red-podatka">
+
+                <span class="naziv-podatka">
+                    Telefon
+                </span>
+
+                <span class="vrednost-podatka">
+                    @Model.KontaktTelefon
+                </span>
+
+            </div>
+
+            <div class="red-podatka">
+
+                <span class="naziv-podatka">
+                    Poslednja završena škola
+                </span>
+
+                <span class="vrednost-podatka">
+
+                    @if (string.IsNullOrWhiteSpace(Model.PoslednjaSkola))
+                    {
+                        <span>Nije uneto</span>
+                    }
+                    else
+                    {
+                        @Model.PoslednjaSkola
+                    }
+
+                </span>
+
+            </div>
+
+            <div class="red-podatka">
+
+                <span class="naziv-podatka">
+                    Mesto škole
+                </span>
+
+                <span class="vrednost-podatka">
+
+                    @if (string.IsNullOrWhiteSpace(Model.MestoSkole))
+                    {
+                        <span>Nije uneto</span>
+                    }
+                    else
+                    {
+                        @Model.MestoSkole
+                    }
+
+                </span>
+
+            </div>
+
+            <div class="red-podatka">
+
+                <span class="naziv-podatka">
+                    Stečeno zanimanje
+                </span>
+
+                <span class="vrednost-podatka">
+
+                    @if (string.IsNullOrWhiteSpace(Model.Zanimanje))
+                    {
+                        <span>Nije uneto</span>
+                    }
+                    else
+                    {
+                        @Model.Zanimanje
+                    }
+
+                </span>
+
+            </div>
+
+            <div class="red-podatka">
+
+                <span class="naziv-podatka">
+                    Stepen obrazovanja
+                </span>
+
+                <span class="vrednost-podatka">
+                    @Model.StepenObrazovanja
+                </span>
+
+            </div>
+
+            <div class="red-podatka">
+
+                <span class="naziv-podatka">
+                    Godine iskustva
+                </span>
+
+                <span class="vrednost-podatka">
+                    @Model.GodineIskustva
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="kartica-podataka">
+
+            <h2 class="naslov-kartice">
+                Podaci o prijavi
+            </h2>
+
+            <div class="red-podatka">
+
+                <span class="naziv-podatka">
+                    Naziv konkursa
+                </span>
+
+                <span class="vrednost-podatka">
+                    @Model.NazivKonkursa
+                </span>
+
+            </div>
+
+            <div class="red-podatka">
+
+                <span class="naziv-podatka">
+                    Radno mesto
+                </span>
+
+                <span class="vrednost-podatka">
+
+                    @if (string.IsNullOrWhiteSpace(Model.RadnoMesto))
+                    {
+                        <span>Nije uneto</span>
+                    }
+                    else
+                    {
+                        @Model.RadnoMesto
+                    }
+
+                </span>
+
+            </div>
+
+            <div class="red-podatka">
+
+                <span class="naziv-podatka">
+                    Datum podnošenja
+                </span>
+
+                <span class="vrednost-podatka">
+                    @String.Format(
+                             "{0:dd.MM.yyyy}",
+                             Model.DatumPodnosenja
+                         )
+                </span>
+
+            </div>
+
+            <div class="red-podatka">
+
+                <span class="naziv-podatka">
+                    Rok konkursa
+                </span>
+
+                <span class="vrednost-podatka">
+                    @String.Format(
+                             "{0:dd.MM.yyyy}",
+                             Model.RokKonkursa
+                         )
+                </span>
+
+            </div>
+
+            <div class="red-podatka">
+
+                <span class="naziv-podatka">
+                    Status prijave
+                </span>
+
+                <span class="vrednost-podatka">
+                    @statusPrijave
+                </span>
+
+            </div>
+
+            <div class="red-podatka">
+
+                <span class="naziv-podatka">
+                    Ispunjava osnovne uslove
+                </span>
+
+                <span class="vrednost-podatka">
+
+                    @if (Model.IspunjavaOsnovneUslove)
+                    {
+                        <span class="uslov-ispunjen">
+                            Da
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="uslov-nije-ispunjen">
+                            Ne
+                        </span>
+                    }
+
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="odeljak-sadrzaja">
+
+        <h2 class="naslov-kartice">
+            Motivaciono pismo
+        </h2>
+
+        <div class="tekst-motivacionog-pisma">
+
+            @if (string.IsNullOrWhiteSpace(
+                Model.MotivacionoPismo))
+            {
+                <span class="prazan-sadrzaj">
+                    Nije uneto motivaciono pismo.
+                </span>
+            }
+            else
+            {
+                @Model.MotivacionoPismo
+            }
+
+        </div>
+
+    </div>
+
+    <div class="odeljak-sadrzaja">
+
+        <h2 class="naslov-kartice">
+            Dokumentacija
+        </h2>
+
+        @if (Model.Dokumentacija != null &&
+             Model.Dokumentacija.Count > 0)
+        {
+            <ul class="spisak-dokumenata">
+
+                @foreach (var dokument in Model.Dokumentacija)
+                {
+                    <li class="stavka-dokumenta">
+
+                        <span class="naziv-dokumenta">
+                            @dokument.NazivDokumenta
+                        </span>
+
+                        @if (dokument.Dostavljen)
+                        {
+                            <span class="dokument-dostavljen">
+                                Dostavljen
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="dokument-nije-dostavljen">
+                                Nije dostavljen
+                            </span>
+                        }
+
+                    </li>
+                }
+
+            </ul>
+        }
+        else
+        {
+            <p class="prazan-sadrzaj">
+                Nema podataka o dokumentaciji.
+            </p>
+        }
+
+    </div>
+
+    <div class="podnozje-za-stampu">
+
+        <div class="potpisi-za-stampu">
+
+            <div class="potpis-polje">
+                Potpis kandidata
+            </div>
+
+            <div class="potpis-polje">
+                Potpis ovlašćenog lica
+            </div>
+
+        </div>
+
+        <div class="napomena-za-stampu">
+            Dokument je generisan iz sistema za prijavu kandidata
+            i obradu konkursa za posao. Podaci prikazani u dokumentu
+            odgovaraju stanju prijave u trenutku štampanja.
+        </div>
+
+    </div>
+
+    <div class="dugmad-akcije">
+
+        <a class="dugme-akcije dugme-nazad"
+           href="@Url.Action(
+               akcijaZaPovratak,
+               "Zahtev")">
+            Nazad
+        </a>
+
+        @if (korisnikJeAdministrator)
+        {
+            <a class="dugme-akcije dugme-izmeni"
+               href="@Url.Action(
+                   "Izmeni",
+                   "Zahtev",
+                   new
+                   {
+                       id = Model.ZahtevID
+                   })">
+                Izmeni prijavu
+            </a>
+        }
+
+        <button type="button"
+                class="dugme-akcije dugme-stampaj"
+                onclick="window.print();">
+            Štampaj prijavu
+        </button>
+
+    </div>
+
+</div>

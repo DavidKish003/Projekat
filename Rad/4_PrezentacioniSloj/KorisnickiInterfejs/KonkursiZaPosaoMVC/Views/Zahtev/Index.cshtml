@@ -1,0 +1,1079 @@
+﻿@model System.Data.DataTable
+
+@{
+    ViewBag.Title = "Prijave kandidata";
+
+
+string trenutnaPretraga =
+Convert.ToString(
+Request.QueryString["pretraga"]
+);
+
+    string trenutniStatus =
+        Convert.ToString(
+            Request.QueryString["status"]
+        );
+
+    string pretragaZaStampu =
+        string.IsNullOrWhiteSpace(trenutnaPretraga)
+            ? "Nije primenjena"
+            : trenutnaPretraga;
+
+    string statusZaStampu =
+        string.IsNullOrWhiteSpace(trenutniStatus)
+            ? "Svi statusi"
+            : trenutniStatus;
+
+    int brojRezultata =
+        Model == null
+            ? 0
+            : Model.Rows.Count;
+
+    string datumIzvestaja =
+        DateTime.Now.ToString(
+            "dd.MM.yyyy. HH:mm"
+        );
+
+
+}
+
+<style>
+    .stranica-prijava {
+        max-width: 1250px;
+        margin: 35px auto;
+        color: #1e293b;
+    }
+
+    .zaglavlje-prijava {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 25px;
+        overflow: hidden;
+        margin-bottom: 25px;
+        padding: 35px;
+        border-radius: 22px;
+        background: linear-gradient( 135deg, #0f172a 0%, #1e3a5f 60%, #0f766e 100% );
+        color: #ffffff;
+        box-shadow: 0 16px 38px rgba(15, 23, 42, 0.17);
+    }
+
+        .zaglavlje-prijava::after {
+            content: "";
+            position: absolute;
+            top: -100px;
+            right: -75px;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+    .sadrzaj-zaglavlja {
+        position: relative;
+        z-index: 1;
+    }
+
+    .mali-naslov-prijava {
+        display: inline-block;
+        margin-bottom: 12px;
+        padding: 6px 13px;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 30px;
+        background: rgba(255, 255, 255, 0.08);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+    }
+
+    .naslov-prijava {
+        margin: 0 0 10px;
+        font-size: 35px;
+        font-weight: 700;
+    }
+
+    .opis-prijava {
+        max-width: 720px;
+        margin: 0;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 15px;
+        line-height: 1.7;
+    }
+
+    .dugme-nova-prijava {
+        position: relative;
+        z-index: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 165px;
+        min-height: 46px;
+        padding: 11px 20px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+        background: #ffffff;
+        color: #0f172a;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: 0.2s ease;
+    }
+
+        .dugme-nova-prijava:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+
+    .poruka-uspeha {
+        margin-bottom: 22px;
+        padding: 15px 18px;
+        border: 1px solid #86efac;
+        border-radius: 11px;
+        background: #dcfce7;
+        color: #166534;
+        font-weight: 600;
+    }
+
+    .poruka-greske {
+        margin-bottom: 22px;
+        padding: 15px 18px;
+        border: 1px solid #fca5a5;
+        border-radius: 11px;
+        background: #fee2e2;
+        color: #991b1b;
+        font-weight: 600;
+    }
+
+    .okvir-filtera {
+        margin-bottom: 25px;
+        padding: 22px;
+        border: 1px solid #e2e8f0;
+        border-radius: 17px;
+        background: #ffffff;
+        box-shadow: 0 8px 25px rgba(15, 23, 42, 0.06);
+    }
+
+    .zaglavlje-filtera {
+        margin-bottom: 16px;
+    }
+
+    .naslov-filtera {
+        margin: 0 0 4px;
+        color: #0f172a;
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    .opis-filtera {
+        margin: 0;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    .obrazac-filtera {
+        display: grid;
+        grid-template-columns: minmax(240px, 2fr) minmax(180px, 1fr) auto auto auto;
+        gap: 13px;
+        align-items: end;
+    }
+
+    .polje-filtera {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .naziv-filtera {
+        color: #475569;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .kontrola-filtera {
+        width: 100%;
+        min-height: 43px;
+        padding: 10px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 9px;
+        background: #ffffff;
+        color: #1e293b;
+        font-size: 14px;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .kontrola-filtera:focus {
+            border-color: #0f766e;
+            box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+        }
+
+    .dugme-filtera {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 43px;
+        padding: 10px 18px;
+        border: none;
+        border-radius: 9px;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+        .dugme-filtera:hover {
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+
+    .dugme-pretrazi {
+        background: #0f766e;
+        color: #ffffff;
+    }
+
+        .dugme-pretrazi:hover {
+            background: #115e59;
+            color: #ffffff;
+        }
+
+    .dugme-stampaj {
+        border: 1px solid #334155;
+        background: #334155;
+        color: #ffffff;
+    }
+
+        .dugme-stampaj:hover {
+            border-color: #0f172a;
+            background: #0f172a;
+            color: #ffffff;
+        }
+
+    .dugme-ocisti {
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        color: #475569;
+    }
+
+        .dugme-ocisti:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+    .podaci-za-stampu {
+        display: none;
+    }
+
+    .okvir-tabele {
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
+    }
+
+    .tabela-prijava {
+        width: 100%;
+        margin: 0;
+        border-collapse: collapse;
+    }
+
+        .tabela-prijava thead {
+            background: #f1f5f9;
+        }
+
+        .tabela-prijava th {
+            padding: 16px 17px;
+            border-bottom: 1px solid #cbd5e1;
+            color: #334155;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            text-align: left;
+            text-transform: uppercase;
+        }
+
+        .tabela-prijava td {
+            padding: 18px 17px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+
+        .tabela-prijava tbody tr {
+            transition: background 0.15s ease;
+        }
+
+            .tabela-prijava tbody tr:hover {
+                background: #f8fafc;
+            }
+
+            .tabela-prijava tbody tr:last-child td {
+                border-bottom: none;
+            }
+
+    .ime-kandidata {
+        display: block;
+        margin-bottom: 4px;
+        color: #0f172a;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .email-kandidata {
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    .naziv-konkursa {
+        color: #334155;
+        font-weight: 600;
+    }
+
+    .datum-podnosenja {
+        color: #475569;
+        white-space: nowrap;
+    }
+
+    .oznaka-statusa {
+        display: inline-block;
+        padding: 7px 12px;
+        border-radius: 30px;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .status-primljena {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .status-razmatranje {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-izabran {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-odbijena {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .status-nepoznat {
+        background: #e2e8f0;
+        color: #475569;
+    }
+
+    .grupa-akcija {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .obrazac-akcije {
+        display: inline;
+        margin: 0;
+    }
+
+    .dugme-akcije {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 34px;
+        padding: 7px 11px;
+        border: 1px solid transparent;
+        border-radius: 7px;
+        background: transparent;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1;
+        text-decoration: none;
+        cursor: pointer;
+        transition: 0.15s ease;
+    }
+
+        .dugme-akcije:hover {
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+
+    .dugme-detalji {
+        border-color: #94a3b8;
+        color: #475569;
+    }
+
+        .dugme-detalji:hover {
+            border-color: #64748b;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+    .dugme-izmeni {
+        border-color: #93c5fd;
+        color: #1d4ed8;
+    }
+
+        .dugme-izmeni:hover {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+    .dugme-prihvati {
+        border-color: #86efac;
+        color: #166534;
+    }
+
+        .dugme-prihvati:hover {
+            background: #dcfce7;
+            color: #14532d;
+        }
+
+    .dugme-odbij {
+        border-color: #fdba74;
+        color: #c2410c;
+    }
+
+        .dugme-odbij:hover {
+            background: #ffedd5;
+            color: #9a3412;
+        }
+
+    .dugme-obrisi {
+        border-color: #fca5a5;
+        color: #b91c1c;
+    }
+
+        .dugme-obrisi:hover {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+    .poruka-bez-prijava {
+        padding: 55px 25px;
+        border: 1px dashed #94a3b8;
+        border-radius: 18px;
+        background: #f8fafc;
+        text-align: center;
+    }
+
+        .poruka-bez-prijava h3 {
+            margin: 0 0 10px;
+            color: #334155;
+            font-size: 23px;
+            font-weight: 700;
+        }
+
+        .poruka-bez-prijava p {
+            margin: 0;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+    @@media (max-width: 1100px) {
+        .obrazac-filtera {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .dugme-filtera {
+            width: 100%;
+        }
+    }
+
+    @@media (max-width: 950px) {
+        .obrazac-filtera {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .okvir-tabele {
+            overflow-x: auto;
+        }
+
+        .tabela-prijava {
+            min-width: 950px;
+        }
+    }
+
+    @@media (max-width: 650px) {
+        .stranica-prijava {
+            margin-top: 20px;
+        }
+
+        .zaglavlje-prijava {
+            align-items: stretch;
+            flex-direction: column;
+            padding: 27px 23px;
+        }
+
+        .naslov-prijava {
+            font-size: 28px;
+        }
+
+        .dugme-nova-prijava {
+            width: 100%;
+        }
+
+        .obrazac-filtera {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media print {
+        @@page {
+            size: A4 landscape;
+            margin: 12mm;
+        }
+
+        body {
+            background: #ffffff !important;
+            color: #000000 !important;
+        }
+
+        nav,
+        footer,
+        .navbar,
+        .zaglavlje-prijava,
+        .okvir-filtera,
+        .poruka-uspeha,
+        .poruka-greske,
+        .kolona-akcije {
+            display: none !important;
+        }
+
+        .container,
+        .body-content {
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .stranica-prijava {
+            width: 100%;
+            max-width: none;
+            margin: 0;
+            padding: 0;
+            color: #000000;
+        }
+
+        .podaci-za-stampu {
+            display: block !important;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #000000;
+        }
+
+        .naslov-za-stampu {
+            margin: 0 0 14px;
+            color: #000000;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .red-podataka-za-stampu {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 30px;
+            margin-bottom: 6px;
+            color: #000000;
+            font-size: 12px;
+        }
+
+        .okvir-tabele {
+            overflow: visible;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .tabela-prijava {
+            width: 100%;
+            min-width: 0;
+            border-collapse: collapse;
+            color: #000000;
+            font-size: 11px;
+        }
+
+            .tabela-prijava thead {
+                display: table-header-group;
+                background: #ffffff !important;
+            }
+
+            .tabela-prijava th {
+                padding: 8px;
+                border: 1px solid #000000;
+                background: #ffffff !important;
+                color: #000000 !important;
+                font-size: 10px;
+            }
+
+            .tabela-prijava td {
+                padding: 8px;
+                border: 1px solid #000000;
+                background: #ffffff !important;
+                color: #000000 !important;
+            }
+
+            .tabela-prijava tr {
+                page-break-inside: avoid;
+            }
+
+        .ime-kandidata,
+        .email-kandidata,
+        .naziv-konkursa,
+        .datum-podnosenja {
+            color: #000000 !important;
+        }
+
+        .oznaka-statusa {
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            background: transparent !important;
+            color: #000000 !important;
+        }
+
+        .poruka-bez-prijava {
+            border: 1px solid #000000;
+            background: #ffffff;
+            color: #000000;
+        }
+
+            .poruka-bez-prijava h3,
+            .poruka-bez-prijava p {
+                color: #000000;
+            }
+
+        a[href]::after {
+            content: none !important;
+        }
+    }
+</style>
+
+<div class="stranica-prijava">
+
+
+    @if (TempData["Poruka"] != null)
+                {
+                    <div class="poruka-uspeha">
+                        @TempData["Poruka"]
+                    </div>
+                }
+
+    @if (TempData["Greska"] != null)
+    {
+        <div class="poruka-greske">
+            @TempData["Greska"]
+        </div>
+    }
+
+    <div class="zaglavlje-prijava">
+
+        <div class="sadrzaj-zaglavlja">
+
+            <span class="mali-naslov-prijava">
+                Administracija konkursa
+            </span>
+
+            <h1 class="naslov-prijava">
+                Prijave kandidata
+            </h1>
+
+            <p class="opis-prijava">
+                Pregledajte sve podnete prijave, otvorite detalje,
+                izmenite podatke i donesite odluku o kandidatima.
+            </p>
+
+        </div>
+
+        <a class="dugme-nova-prijava"
+           href="@Url.Action("Dodaj", "Zahtev")">
+            Nova prijava
+        </a>
+
+    </div>
+
+    <div class="okvir-filtera">
+
+        <div class="zaglavlje-filtera">
+
+            <h2 class="naslov-filtera">
+                Pretraga i filtriranje
+            </h2>
+
+            <p class="opis-filtera">
+                Prona&#273;ite prijavu prema kandidatu,
+                e-mail adresi, konkursu ili statusu.
+            </p>
+
+        </div>
+
+        <form method="get"
+              action="@Url.Action("Index", "Zahtev")"
+              class="obrazac-filtera">
+
+            <div class="polje-filtera">
+
+                <label class="naziv-filtera"
+                       for="pretraga">
+                    Pretraga
+                </label>
+
+                <input type="text"
+                       id="pretraga"
+                       name="pretraga"
+                       class="kontrola-filtera"
+                       value="@trenutnaPretraga"
+                       placeholder="Ime, e-mail ili naziv konkursa" />
+
+            </div>
+
+            <div class="polje-filtera">
+
+                <label class="naziv-filtera"
+                       for="status">
+                    Status prijave
+                </label>
+
+                <select id="status"
+                        name="status"
+                        class="kontrola-filtera">
+
+                    <option value="">
+                        Svi statusi
+                    </option>
+
+                    @foreach (string vrednostStatusa in new[]
+                    {
+                    "Primljena",
+                    "U razmatranju",
+                    "Izabran",
+                    "Odbijena"
+                })
+                    {
+                        if (trenutniStatus == vrednostStatusa)
+                        {
+                            <option value="@vrednostStatusa"
+                                    selected="selected">
+                                @vrednostStatusa
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="@vrednostStatusa">
+                                @vrednostStatusa
+                            </option>
+                        }
+                    }
+
+                </select>
+
+            </div>
+
+            <button type="submit"
+                    class="dugme-filtera dugme-pretrazi">
+                Pretra&#382;i
+            </button>
+
+            <button type="button"
+                    class="dugme-filtera dugme-stampaj"
+                    onclick="stampajPrijave();">
+                &#352;tampaj prikaz
+            </button>
+
+            <a class="dugme-filtera dugme-ocisti"
+               href="@Url.Action("Index", "Zahtev")">
+                O&#269;isti
+            </a>
+
+        </form>
+
+    </div>
+
+    <div class="podaci-za-stampu">
+
+        <h1 class="naslov-za-stampu">
+            Izve&#353;taj o prijavama kandidata
+        </h1>
+
+        <div class="red-podataka-za-stampu">
+
+            <span>
+                <strong>Pretraga:</strong>
+                @pretragaZaStampu
+            </span>
+
+            <span>
+                <strong>Status:</strong>
+                @statusZaStampu
+            </span>
+
+            <span>
+                <strong>Broj rezultata:</strong>
+                @brojRezultata
+            </span>
+
+        </div>
+
+        <div class="red-podataka-za-stampu">
+
+            <span>
+                <strong>Datum izve&#353;taja:</strong>
+                @datumIzvestaja
+            </span>
+
+        </div>
+
+    </div>
+
+    @if (Model == null || Model.Rows.Count == 0)
+    {
+        <div class="poruka-bez-prijava">
+
+            <h3>
+                Nema prona&#273;enih prijava
+            </h3>
+
+            <p>
+                Trenutno ne postoji nijedna prijava koja odgovara
+                izabranim kriterijumima pretrage.
+            </p>
+
+        </div>
+    }
+    else
+    {
+        <div class="okvir-tabele">
+
+            <table class="tabela-prijava">
+
+                <thead>
+                    <tr>
+                        <th>Kandidat</th>
+                        <th>Konkurs</th>
+                        <th>Datum</th>
+                        <th>Status</th>
+
+                        <th class="kolona-akcije">
+                            Akcije
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (System.Data.DataRow red in Model.Rows)
+                    {
+                        var zahtevId =
+                            red["ZahtevID"];
+
+                        string statusPrijave =
+                            Convert.ToString(
+                                red["StatusZahteva"]
+                            );
+
+                        string klasaStatusa =
+                            "oznaka-statusa status-nepoznat";
+
+                        if (string.Equals(
+                            statusPrijave,
+                            "Primljena",
+                            StringComparison.OrdinalIgnoreCase))
+                        {
+                            klasaStatusa =
+                                "oznaka-statusa status-primljena";
+                        }
+                        else if (string.Equals(
+                            statusPrijave,
+                            "U razmatranju",
+                            StringComparison.OrdinalIgnoreCase))
+                        {
+                            klasaStatusa =
+                                "oznaka-statusa status-razmatranje";
+                        }
+                        else if (string.Equals(
+                            statusPrijave,
+                            "Izabran",
+                            StringComparison.OrdinalIgnoreCase))
+                        {
+                            klasaStatusa =
+                                "oznaka-statusa status-izabran";
+                        }
+                        else if (
+                            string.Equals(
+                                statusPrijave,
+                                "Odbijena",
+                                StringComparison.OrdinalIgnoreCase)
+                            ||
+                            string.Equals(
+                                statusPrijave,
+                                "Odbijen",
+                                StringComparison.OrdinalIgnoreCase))
+                        {
+                            klasaStatusa =
+                                "oznaka-statusa status-odbijena";
+                        }
+
+                        <tr>
+
+                            <td>
+                                <span class="ime-kandidata">
+                                    @red["ImePrezime"]
+                                </span>
+
+                                <span class="email-kandidata">
+                                    @red["Email"]
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="naziv-konkursa">
+                                    @red["NazivKonkursa"]
+                                </span>
+                            </td>
+
+                            <td class="datum-podnosenja">
+                                @String.Format(
+                                         "{0:dd.MM.yyyy}",
+                                         Convert.ToDateTime(
+                                             red["DatumPodnosenja"]
+                                         )
+                                     )
+                            </td>
+
+                            <td>
+                                <span class="@klasaStatusa">
+                                    @statusPrijave
+                                </span>
+                            </td>
+
+                            <td class="kolona-akcije">
+
+                                <div class="grupa-akcija">
+
+                                    <a class="dugme-akcije dugme-detalji"
+                                       href="@Url.Action(
+                                       "Detalji",
+                                       "Zahtev",
+                                       new
+                                       {
+                                           id = zahtevId
+                                       })">
+                                        Detalji
+                                    </a>
+
+                                    <a class="dugme-akcije dugme-izmeni"
+                                       href="@Url.Action(
+                                       "Izmeni",
+                                       "Zahtev",
+                                       new
+                                       {
+                                           id = zahtevId
+                                       })">
+                                        Izmeni
+                                    </a>
+
+                                    @using (Html.BeginForm(
+                                        "Prihvati",
+                                        "Zahtev",
+                                        FormMethod.Post,
+                                        new
+                                        {
+                                            @class = "obrazac-akcije"
+                                        }))
+                                    {
+                                        <input type="hidden"
+                                               name="id"
+                                               value="@zahtevId" />
+
+                                        <button type="submit"
+                                                class="dugme-akcije dugme-prihvati"
+                                                onclick="return confirm('Da li sigurno želite da izaberete ovog kandidata?');">
+                                            Prihvati
+                                        </button>
+                                    }
+
+                                    @using (Html.BeginForm(
+                                        "Odbij",
+                                        "Zahtev",
+                                        FormMethod.Post,
+                                        new
+                                        {
+                                            @class = "obrazac-akcije"
+                                        }))
+                                    {
+                                        <input type="hidden"
+                                               name="id"
+                                               value="@zahtevId" />
+
+                                        <button type="submit"
+                                                class="dugme-akcije dugme-odbij"
+                                                onclick="return confirm('Da li sigurno želite da odbijete ovu prijavu?');">
+                                            Odbij
+                                        </button>
+                                    }
+
+                                    @using (Html.BeginForm(
+                                        "Obrisi",
+                                        "Zahtev",
+                                        FormMethod.Post,
+                                        new
+                                        {
+                                            @class = "obrazac-akcije"
+                                        }))
+                                    {
+                                        <input type="hidden"
+                                               name="id"
+                                               value="@zahtevId" />
+
+                                        <button type="submit"
+                                                class="dugme-akcije dugme-obrisi"
+                                                onclick="return confirm('Da li sigurno želite trajno da obrišete ovu prijavu? Ova radnja se ne može poništiti.');">
+                                            Obri&#353;i
+                                        </button>
+                                    }
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+    }
+
+
+</div>
+
+<script>function stampajPrijave() {
+        var prethodniNaslov =
+            document.title;
+
+        document.title =
+            "Prijave kandidata";
+
+        window.print();
+
+        window.setTimeout(
+            function () {
+                document.title =
+                    prethodniNaslov;
+            },
+            500
+        );
+    }</script>

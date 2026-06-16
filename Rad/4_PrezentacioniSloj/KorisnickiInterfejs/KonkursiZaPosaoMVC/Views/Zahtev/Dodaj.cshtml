@@ -1,0 +1,1310 @@
+﻿@model KlasePodataka.ZahtevZaRegistracijuKlasa
+
+@{
+    ViewBag.Title = "Nova prijava";
+
+    var zanimanja =
+        ViewBag.Zanimanja
+            as System.Collections.Generic.IEnumerable<string>
+        ?? new string[0];
+
+    var radnaMesta =
+        ViewBag.RadnaMesta
+            as System.Collections.Generic.IEnumerable<string>
+        ?? new string[0];
+
+    string[] stepeniObrazovanja =
+    {
+        "Srednja škola",
+        "Viša škola",
+        "Visoko obrazovanje",
+        "Master"
+    };
+
+    string rokKonkursaZaPrikaz =
+        Model != null &&
+        Model.RokKonkursa > DateTime.MinValue
+            ? Model.RokKonkursa.ToString("yyyy-MM-dd")
+            : string.Empty;
+
+    string[] izabranaDokumenta =
+        Request.Form.GetValues("Dokumenta")
+        ?? new string[0];
+
+    bool cvIzabran =
+        Array.IndexOf(
+            izabranaDokumenta,
+            "1"
+        ) >= 0;
+
+    bool motivacionoPismoIzabrano =
+        Array.IndexOf(
+            izabranaDokumenta,
+            "2"
+        ) >= 0;
+
+    bool diplomaIzabrana =
+        Array.IndexOf(
+            izabranaDokumenta,
+            "3"
+        ) >= 0;
+
+    bool preporukaIzabrana =
+        Array.IndexOf(
+            izabranaDokumenta,
+            "4"
+        ) >= 0;
+
+    bool korisnikJeAdministrator =
+        string.Equals(
+            Convert.ToString(Session["Uloga"]),
+            "Admin",
+            StringComparison.OrdinalIgnoreCase
+        )
+        ||
+        string.Equals(
+            Convert.ToString(Session["Uloga"]),
+            "Administrator",
+            StringComparison.OrdinalIgnoreCase
+        );
+
+    string akcijaZaPovratak =
+        korisnikJeAdministrator
+            ? "Index"
+            : "MojePrijave";
+}
+
+<style>
+    .stranica-nove-prijave {
+        max-width: 1050px;
+        margin: 35px auto;
+        color: #1e293b;
+    }
+
+    .zaglavlje-prijave {
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 26px;
+        padding: 38px;
+        border-radius: 22px;
+        background: linear-gradient( 135deg, #0f172a 0%, #1e3a5f 60%, #0f766e 100% );
+        color: #ffffff;
+        box-shadow: 0 16px 38px rgba(15, 23, 42, 0.17);
+    }
+
+        .zaglavlje-prijave::after {
+            content: "";
+            position: absolute;
+            top: -90px;
+            right: -70px;
+            width: 230px;
+            height: 230px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+    .sadrzaj-zaglavlja {
+        position: relative;
+        z-index: 1;
+    }
+
+    .mali-naslov-prijave {
+        display: inline-block;
+        margin-bottom: 12px;
+        padding: 6px 12px;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 30px;
+        background: rgba(255, 255, 255, 0.08);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+    }
+
+    .glavni-naslov-prijave {
+        margin: 0 0 12px;
+        font-size: 36px;
+        font-weight: 700;
+    }
+
+    .opis-prijave {
+        max-width: 700px;
+        margin: 0;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 16px;
+        line-height: 1.7;
+    }
+
+    .poruka-validacije,
+    .js-poruka-validacije {
+        margin-bottom: 24px;
+        padding: 16px 20px;
+        border: 1px solid #fecaca;
+        border-radius: 12px;
+        background: #fef2f2;
+        color: #991b1b;
+    }
+
+        .poruka-validacije:empty {
+            display: none;
+        }
+
+        .poruka-validacije ul,
+        .js-poruka-validacije ul {
+            margin: 8px 0 0;
+            padding-left: 20px;
+        }
+
+    .js-poruka-validacije {
+        display: none;
+    }
+
+        .js-poruka-validacije.prikazana {
+            display: block;
+        }
+
+    .obrazac-prijave {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
+
+    .odeljak-obrasca {
+        padding: 28px;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 9px 28px rgba(15, 23, 42, 0.06);
+    }
+
+    .zaglavlje-odeljka {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 24px;
+        padding-bottom: 17px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .broj-odeljka {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 42px;
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: #ecfdf5;
+        color: #047857;
+        font-size: 17px;
+        font-weight: 700;
+    }
+
+    .naslov-odeljka {
+        margin: 0 0 4px;
+        color: #0f172a;
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .opis-odeljka {
+        margin: 0;
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    .mreza-polja {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 22px;
+    }
+
+    .polje-obrasca {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .polje-preko-cele-sirine {
+        grid-column: 1 / -1;
+    }
+
+    .naziv-polja {
+        color: #334155;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .obavezno-polje {
+        margin-left: 4px;
+        color: #dc2626;
+    }
+
+    .kontrola-polja {
+        width: 100%;
+        min-height: 45px;
+        padding: 11px 13px;
+        border: 1px solid #cbd5e1;
+        border-radius: 9px;
+        background: #ffffff;
+        color: #1e293b;
+        font-size: 15px;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+        .kontrola-polja:focus {
+            border-color: #0f766e;
+            box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+        }
+
+        .kontrola-polja::placeholder {
+            color: #94a3b8;
+        }
+
+        .kontrola-polja.polje-neispravno {
+            border-color: #dc2626 !important;
+            background: #fff7f7;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        }
+
+        .kontrola-polja.polje-ispravno {
+            border-color: #16a34a;
+            background: #f7fff9;
+        }
+
+    .field-validation-error,
+    .text-danger {
+        color: #dc2626;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .kombinovano-polje {
+        position: relative;
+        display: flex;
+        width: 100%;
+    }
+
+    .kombinovani-unos {
+        flex: 1;
+        min-width: 0;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    .dugme-padajuce-liste {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 48px;
+        min-height: 45px;
+        border: 1px solid #cbd5e1;
+        border-left: none;
+        border-radius: 0 9px 9px 0;
+        background: #f8fafc;
+        color: #475569;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+
+        .dugme-padajuce-liste:hover {
+            background: #ecfdf5;
+            color: #0f766e;
+        }
+
+        .dugme-padajuce-liste:focus {
+            outline: none;
+            border-color: #0f766e;
+            box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+        }
+
+    .padajuca-lista-predloga {
+        position: absolute;
+        z-index: 1000;
+        top: calc(100% + 6px);
+        right: 0;
+        left: 0;
+        display: none;
+        max-height: 240px;
+        overflow-y: auto;
+        padding: 6px;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        background: #ffffff;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.15);
+    }
+
+        .padajuca-lista-predloga.prikazana {
+            display: block;
+        }
+
+    .stavka-predloga {
+        display: block;
+        width: 100%;
+        padding: 10px 12px;
+        border: none;
+        border-radius: 7px;
+        background: transparent;
+        color: #334155;
+        font-size: 14px;
+        text-align: left;
+        cursor: pointer;
+    }
+
+        .stavka-predloga:hover,
+        .stavka-predloga:focus {
+            background: #ecfdf5;
+            color: #047857;
+            outline: none;
+        }
+
+        .stavka-predloga[hidden] {
+            display: none;
+        }
+
+    .poruka-bez-predloga {
+        display: none;
+        margin: 0;
+        padding: 10px 12px;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    .tekstualno-polje {
+        min-height: 150px;
+        resize: vertical;
+        line-height: 1.6;
+    }
+
+    .pomocni-tekst {
+        margin: 0;
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .mreza-dokumenata {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 15px;
+    }
+
+    .stavka-dokumenta {
+        display: flex;
+        align-items: flex-start;
+        gap: 13px;
+        padding: 17px;
+        border: 1px solid #e2e8f0;
+        border-radius: 13px;
+        background: #f8fafc;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+        .stavka-dokumenta:hover {
+            border-color: #94a3b8;
+            background: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 7px 18px rgba(15, 23, 42, 0.06);
+        }
+
+    .izbor-dokumenta {
+        flex: 0 0 auto;
+        width: 18px;
+        height: 18px;
+        margin-top: 2px;
+        accent-color: #0f766e;
+        cursor: pointer;
+    }
+
+    .podaci-dokumenta {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .naziv-dokumenta {
+        color: #1e293b;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .opis-dokumenta {
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .oznaka-obavezno {
+        display: inline-block;
+        align-self: flex-start;
+        padding: 4px 8px;
+        border-radius: 20px;
+        background: #fee2e2;
+        color: #991b1b;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .oznaka-opciono {
+        display: inline-block;
+        align-self: flex-start;
+        padding: 4px 8px;
+        border-radius: 20px;
+        background: #e2e8f0;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .napomena-poslovnog-pravila {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        margin-top: 20px;
+        padding: 16px;
+        border: 1px solid #bae6fd;
+        border-radius: 12px;
+        background: #f0f9ff;
+        color: #075985;
+    }
+
+    .oznaka-informacije {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 28px;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #0284c7;
+        color: #ffffff;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .tekst-informacije {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .dugmad-obrasca {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 12px;
+        padding: 22px 28px;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        background: #ffffff;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+    }
+
+    .dugme-obrasca {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 10px 21px;
+        border: none;
+        border-radius: 9px;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+        .dugme-obrasca:hover {
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+
+    .dugme-sacuvaj {
+        background: #0f766e;
+        color: #ffffff;
+        box-shadow: 0 6px 15px rgba(15, 118, 110, 0.2);
+    }
+
+        .dugme-sacuvaj:hover {
+            background: #115e59;
+            color: #ffffff;
+        }
+
+    .dugme-odustani {
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        color: #475569;
+    }
+
+        .dugme-odustani:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+    @@media (max-width: 768px) {
+        .stranica-nove-prijave {
+            margin-top: 20px;
+        }
+
+        .zaglavlje-prijave {
+            padding: 28px 23px;
+        }
+
+        .glavni-naslov-prijave {
+            font-size: 29px;
+        }
+
+        .odeljak-obrasca {
+            padding: 22px;
+        }
+
+        .mreza-polja,
+        .mreza-dokumenata {
+            grid-template-columns: 1fr;
+        }
+
+        .polje-preko-cele-sirine {
+            grid-column: auto;
+        }
+
+        .dugmad-obrasca {
+            align-items: stretch;
+            flex-direction: column-reverse;
+            padding: 20px;
+        }
+
+        .dugme-obrasca {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="stranica-nove-prijave">
+
+    <div class="zaglavlje-prijave">
+
+        <div class="sadrzaj-zaglavlja">
+
+            <span class="mali-naslov-prijave">
+                Prijava na konkurs
+            </span>
+
+            <h1 class="glavni-naslov-prijave">
+                Nova prijava kandidata
+            </h1>
+
+            <p class="opis-prijave">
+                Unesite podatke o kandidatu, obrazovanju, konkursu
+                i priloženoj dokumentaciji. Polja označena
+                zvezdicom su obavezna.
+            </p>
+
+        </div>
+
+    </div>
+
+    @Html.ValidationSummary(
+            false,
+            "",
+            new
+            {
+                @class = "poruka-validacije"
+            }
+        )
+
+    <div id="jsGreske"
+         class="js-poruka-validacije"
+         role="alert"
+         aria-live="assertive">
+    </div>
+
+    @using (Html.BeginForm(
+        "Dodaj",
+        "Zahtev",
+        FormMethod.Post,
+        new
+        {
+            @class = "obrazac-prijave",
+            id = "FormaPrijave",
+            novalidate = "novalidate"
+        }))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="odeljak-obrasca">
+
+            <div class="zaglavlje-odeljka">
+
+                <div class="broj-odeljka">
+                    1
+                </div>
+
+                <div>
+
+                    <h2 class="naslov-odeljka">
+                        Podaci o kandidatu
+                    </h2>
+
+                    <p class="opis-odeljka">
+                        Lični, kontakt i obrazovni podaci kandidata.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="mreza-polja">
+
+                <div class="polje-obrasca">
+
+                    <label class="naziv-polja"
+                           for="ImePrezime">
+                        Ime i prezime
+                        <span class="obavezno-polje">*</span>
+                    </label>
+
+                    @Html.TextBoxFor(
+                             m => m.ImePrezime,
+                             new
+                             {
+                                 @class = "kontrola-polja",
+                                 id = "ImePrezime",
+                                 placeholder = "Na primer: Marko Marković"
+                             }
+                         )
+
+                    @Html.ValidationMessageFor(
+                             m => m.ImePrezime,
+                             "",
+                             new
+                             {
+                                 @class = "text-danger"
+                             }
+                         )
+
+                </div>
+
+                <div class="polje-obrasca">
+
+                    <label class="naziv-polja"
+                           for="Email">
+                        E-mail adresa
+                        <span class="obavezno-polje">*</span>
+                    </label>
+
+                    @Html.TextBoxFor(
+                             m => m.Email,
+                             new
+                             {
+                                 @class = "kontrola-polja",
+                                 id = "Email",
+                                 type = "email",
+                                 placeholder = "marko@email.com"
+                             }
+                         )
+
+                    @Html.ValidationMessageFor(
+                             m => m.Email,
+                             "",
+                             new
+                             {
+                                 @class = "text-danger"
+                             }
+                         )
+
+                </div>
+
+                <div class="polje-obrasca">
+
+                    <label class="naziv-polja"
+                           for="KontaktTelefon">
+                        Kontakt telefon
+                        <span class="obavezno-polje">*</span>
+                    </label>
+
+                    @Html.TextBoxFor(
+                             m => m.KontaktTelefon,
+                             new
+                             {
+                                 @class = "kontrola-polja",
+                                 id = "KontaktTelefon",
+                                 placeholder = "Na primer: 064 123 4567"
+                             }
+                         )
+
+                    @Html.ValidationMessageFor(
+                             m => m.KontaktTelefon,
+                             "",
+                             new
+                             {
+                                 @class = "text-danger"
+                             }
+                         )
+
+                </div>
+
+                <div class="polje-obrasca">
+
+                    <label class="naziv-polja"
+                           for="PoslednjaSkola">
+                        Poslednja završena škola
+                        <span class="obavezno-polje">*</span>
+                    </label>
+
+                    @Html.TextBoxFor(
+                             m => m.PoslednjaSkola,
+                             new
+                             {
+                                 @class = "kontrola-polja",
+                                 id = "PoslednjaSkola",
+                                 placeholder = "Naziv poslednje završene škole"
+                             }
+                         )
+
+                    @Html.ValidationMessageFor(
+                             m => m.PoslednjaSkola,
+                             "",
+                             new
+                             {
+                                 @class = "text-danger"
+                             }
+                         )
+
+                </div>
+
+                <div class="polje-obrasca">
+
+                    <label class="naziv-polja"
+                           for="MestoSkole">
+                        Mesto škole
+                    </label>
+
+                    @Html.TextBoxFor(
+                             m => m.MestoSkole,
+                             new
+                             {
+                                 @class = "kontrola-polja",
+                                 id = "MestoSkole",
+                                 placeholder = "Mesto u kojem je škola završena"
+                             }
+                         )
+
+                    @Html.ValidationMessageFor(
+                             m => m.MestoSkole,
+                             "",
+                             new
+                             {
+                                 @class = "text-danger"
+                             }
+                         )
+
+                </div>
+
+                <div class="polje-obrasca">
+
+                    <label class="naziv-polja"
+                           for="Zanimanje">
+                        Stečeno zanimanje
+                        <span class="obavezno-polje">*</span>
+                    </label>
+
+                    <div class="kombinovano-polje">
+
+                        @Html.TextBoxFor(
+                                 m => m.Zanimanje,
+                                 new
+                                 {
+                                     @class = "kontrola-polja kombinovani-unos",
+                                     id = "Zanimanje",
+                                     placeholder = "Unesite ili izaberite zanimanje",
+                                     autocomplete = "off"
+                                 }
+                             )
+
+                        <button type="button"
+                                id="DugmeZanimanja"
+                                class="dugme-padajuce-liste"
+                                aria-label="Prikaži ponuđena zanimanja"
+                                aria-expanded="false">
+                            ▼
+                        </button>
+
+                        <div id="ListaZanimanja"
+                             class="padajuca-lista-predloga">
+
+                            @foreach (string zanimanje in zanimanja)
+                            {
+                                <button type="button"
+                                        class="stavka-predloga"
+                                        data-vrednost="@zanimanje">
+                                    @zanimanje
+                                </button>
+                            }
+
+                            <p class="poruka-bez-predloga">
+                                Nema pronađenih zanimanja.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    @Html.ValidationMessageFor(
+                             m => m.Zanimanje,
+                             "",
+                             new
+                             {
+                                 @class = "text-danger"
+                             }
+                         )
+
+                    <p class="pomocni-tekst">
+                        Možete ručno uneti zanimanje ili ga izabrati
+                        iz evidencije sistema.
+                    </p>
+
+                </div>
+
+                <div class="polje-obrasca polje-preko-cele-sirine">
+
+                    <label class="naziv-polja"
+                           for="StepenObrazovanja">
+                        Stepen obrazovanja
+                        <span class="obavezno-polje">*</span>
+                    </label>
+
+                    @Html.DropDownListFor(
+                             m => m.StepenObrazovanja,
+                             new SelectList(
+                                 stepeniObrazovanja
+                             ),
+                             "Izaberite stepen obrazovanja",
+                             new
+                             {
+                                 @class = "kontrola-polja",
+                                 id = "StepenObrazovanja"
+                             }
+                         )
+
+                    @Html.ValidationMessageFor(
+                             m => m.StepenObrazovanja,
+                             "",
+                             new
+                             {
+                                 @class = "text-danger"
+                             }
+                         )
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="odeljak-obrasca">
+
+            <div class="zaglavlje-odeljka">
+
+                <div class="broj-odeljka">
+                    2
+                </div>
+
+                <div>
+
+                    <h2 class="naslov-odeljka">
+                        Podaci o konkursu
+                    </h2>
+
+                    <p class="opis-odeljka">
+                        Konkurs, radno mesto, iskustvo kandidata
+                        i rok za prijavu.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="mreza-polja">
+
+                <div class="polje-obrasca polje-preko-cele-sirine">
+
+                    <label class="naziv-polja"
+                           for="NazivKonkursa">
+                        Naziv konkursa
+                        <span class="obavezno-polje">*</span>
+                    </label>
+
+                    @Html.TextBoxFor(
+                             m => m.NazivKonkursa,
+                             new
+                             {
+                                 @class = "kontrola-polja",
+                                 id = "NazivKonkursa",
+                                 placeholder = "Na primer: Konkurs za rad u IT sektoru"
+                             }
+                         )
+
+                    @Html.ValidationMessageFor(
+                             m => m.NazivKonkursa,
+                             "",
+                             new
+                             {
+                                 @class = "text-danger"
+                             }
+                         )
+
+                </div>
+
+                <div class="polje-obrasca polje-preko-cele-sirine">
+
+                    <label class="naziv-polja"
+                           for="RadnoMesto">
+                        Radno mesto
+                        <span class="obavezno-polje">*</span>
+                    </label>
+
+                    <div class="kombinovano-polje">
+
+                        @Html.TextBoxFor(
+                                 m => m.RadnoMesto,
+                                 new
+                                 {
+                                     @class = "kontrola-polja kombinovani-unos",
+                                     id = "RadnoMesto",
+                                     placeholder = "Unesite ili izaberite radno mesto",
+                                     autocomplete = "off"
+                                 }
+                             )
+
+                        <button type="button"
+                                id="DugmeRadnihMesta"
+                                class="dugme-padajuce-liste"
+                                aria-label="Prikaži ponuđena radna mesta"
+                                aria-expanded="false">
+                            ▼
+                        </button>
+
+                        <div id="ListaRadnihMesta"
+                             class="padajuca-lista-predloga">
+
+                            @foreach (string radnoMesto in radnaMesta)
+                            {
+                                <button type="button"
+                                        class="stavka-predloga"
+                                        data-vrednost="@radnoMesto">
+                                    @radnoMesto
+                                </button>
+                            }
+
+                            <p class="poruka-bez-predloga">
+                                Nema pronađenih radnih mesta.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    @Html.ValidationMessageFor(
+                             m => m.RadnoMesto,
+                             "",
+                             new
+                             {
+                                 @class = "text-danger"
+                             }
+                         )
+
+                    <p class="pomocni-tekst">
+                        Možete ručno uneti radno mesto ili ga izabrati
+                        iz evidencije sistema.
+                    </p>
+
+                </div>
+
+                <div class="polje-obrasca">
+
+                    <label class="naziv-polja"
+                           for="GodineIskustva">
+                        Godine radnog iskustva
+                        <span class="obavezno-polje">*</span>
+                    </label>
+
+                    @Html.TextBoxFor(
+                             m => m.GodineIskustva,
+                             new
+                             {
+                                 @class = "kontrola-polja",
+                                 id = "GodineIskustva",
+                                 type = "number",
+                                 min = "0",
+                                 max = "50",
+                                 step = "1"
+                             }
+                         )
+
+                    @Html.ValidationMessageFor(
+                             m => m.GodineIskustva,
+                             "",
+                             new
+                             {
+                                 @class = "text-danger"
+                             }
+                         )
+
+                    <p class="pomocni-tekst">
+                        Unesite broj punih godina iskustva, od 0 do 50.
+                    </p>
+
+                </div>
+
+                <div class="polje-obrasca">
+
+                    <label class="naziv-polja"
+                           for="RokKonkursa">
+                        Rok konkursa
+                        <span class="obavezno-polje">*</span>
+                    </label>
+
+                    @Html.TextBox(
+                             "RokKonkursa",
+                             rokKonkursaZaPrikaz,
+                             new
+                             {
+                                 @class = "kontrola-polja",
+                                 id = "RokKonkursa",
+                                 type = "date",
+                                 min = DateTime.Today.ToString("yyyy-MM-dd")
+                             }
+                         )
+
+                    @Html.ValidationMessageFor(
+                             m => m.RokKonkursa,
+                             "",
+                             new
+                             {
+                                 @class = "text-danger"
+                             }
+                         )
+
+                    <p class="pomocni-tekst">
+                        Prijava mora biti podneta pre ili na dan isteka konkursa.
+                    </p>
+
+                </div>
+
+                <div class="polje-obrasca polje-preko-cele-sirine">
+
+                    <label class="naziv-polja"
+                           for="MotivacionoPismo">
+                        Motivaciono pismo
+                    </label>
+
+                    @Html.TextAreaFor(
+                             m => m.MotivacionoPismo,
+                             new
+                             {
+                                 @class = "kontrola-polja tekstualno-polje",
+                                 id = "MotivacionoPismo",
+                                 maxlength = "5000",
+                                 placeholder = "Napišite zbog čega ste zainteresovani za ovu poziciju..."
+                             }
+                         )
+
+                    @Html.ValidationMessageFor(
+                             m => m.MotivacionoPismo,
+                             "",
+                             new
+                             {
+                                 @class = "text-danger"
+                             }
+                         )
+
+                    <p class="pomocni-tekst">
+                        Ukratko opišite motivaciju, iskustvo
+                        i razloge za prijavu.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="odeljak-obrasca">
+
+            <div class="zaglavlje-odeljka">
+
+                <div class="broj-odeljka">
+                    3
+                </div>
+
+                <div>
+
+                    <h2 class="naslov-odeljka">
+                        Dokumentacija
+                    </h2>
+
+                    <p class="opis-odeljka">
+                        Označite dokumente koje kandidat dostavlja.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="mreza-dokumenata">
+
+                <label class="stavka-dokumenta">
+
+                    <input type="checkbox"
+                           id="Dokument1"
+                           name="Dokumenta"
+                           value="1"
+                           class="izbor-dokumenta"
+                           @(cvIzabran ? "checked=\"checked\"" : "") />
+
+                    <span class="podaci-dokumenta">
+
+                        <span class="naziv-dokumenta">
+                            Biografija (CV)
+                        </span>
+
+                        <span class="opis-dokumenta">
+                            Pregled obrazovanja, iskustva i veština kandidata.
+                        </span>
+
+                        <span class="oznaka-obavezno">
+                            Evidentira se
+                        </span>
+
+                    </span>
+
+                </label>
+
+                <label class="stavka-dokumenta">
+
+                    <input type="checkbox"
+                           id="Dokument2"
+                           name="Dokumenta"
+                           value="2"
+                           class="izbor-dokumenta"
+                           @(motivacionoPismoIzabrano ? "checked=\"checked\"" : "") />
+
+                    <span class="podaci-dokumenta">
+
+                        <span class="naziv-dokumenta">
+                            Motivaciono pismo
+                        </span>
+
+                        <span class="opis-dokumenta">
+                            Dodatno obrazloženje interesa za radno mesto.
+                        </span>
+
+                        <span class="oznaka-opciono">
+                            Opciono
+                        </span>
+
+                    </span>
+
+                </label>
+
+                <label class="stavka-dokumenta">
+
+                    <input type="checkbox"
+                           id="Dokument3"
+                           name="Dokumenta"
+                           value="3"
+                           class="izbor-dokumenta"
+                           @(diplomaIzabrana ? "checked=\"checked\"" : "") />
+
+                    <span class="podaci-dokumenta">
+
+                        <span class="naziv-dokumenta">
+                            Diploma ili potvrda o obrazovanju
+                        </span>
+
+                        <span class="opis-dokumenta">
+                            Dokaz o završenom stepenu obrazovanja.
+                        </span>
+
+                        <span class="oznaka-obavezno">
+                            Evidentira se
+                        </span>
+
+                    </span>
+
+                </label>
+
+                <label class="stavka-dokumenta">
+
+                    <input type="checkbox"
+                           id="Dokument4"
+                           name="Dokumenta"
+                           value="4"
+                           class="izbor-dokumenta"
+                           @(preporukaIzabrana ? "checked=\"checked\"" : "") />
+
+                    <span class="podaci-dokumenta">
+
+                        <span class="naziv-dokumenta">
+                            Preporuka prethodnog poslodavca
+                        </span>
+
+                        <span class="opis-dokumenta">
+                            Preporuka koja potvrđuje prethodno iskustvo.
+                        </span>
+
+                        <span class="oznaka-opciono">
+                            Opciono
+                        </span>
+
+                    </span>
+
+                </label>
+
+            </div>
+
+            <div class="napomena-poslovnog-pravila">
+
+                <div class="oznaka-informacije">
+                    i
+                </div>
+
+                <p class="tekst-informacije">
+                    Ako je rok konkursa istekao, prijava dobija status
+                    „Odbijena“. Ako je prijava podneta u roku i stečeno
+                    zanimanje odgovara radnom mestu, prijava dobija status
+                    „U razmatranju“. U ostalim slučajevima prijava
+                    dobija status „Primljena“.
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="dugmad-obrasca">
+
+            <a class="dugme-obrasca dugme-odustani"
+               href="@Url.Action(
+                   akcijaZaPovratak,
+                   "Zahtev")">
+                Odustani
+            </a>
+
+            <button type="submit"
+                    class="dugme-obrasca dugme-sacuvaj">
+                Sačuvaj prijavu
+            </button>
+
+        </div>
+    }
+
+</div>
+
+<script src="@Url.Content("~/Scripts/kombinovana-polja.js")"></script>
+<script src="@Url.Content("~/Scripts/validacija-prijave.js")"></script>

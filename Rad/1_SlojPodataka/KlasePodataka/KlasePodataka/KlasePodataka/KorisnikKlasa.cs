@@ -3,20 +3,39 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KlasePodataka
 {
-     [Table("Korisnici")]
-     public class KorisnikKlasa : OsobaKlasa
-     {
-          [Key]
-          public int KorisnikID { get; set; }
+    [Table("Korisnici")]
+    public class KorisnikKlasa
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int KorisnikID
+        {
+            get;
+            set;
+        }
 
-          public string KorisnickoIme { get; set; }
+        [Required]
+        [MaxLength(50)]
+        public string KorisnickoIme
+        {
+            get;
+            set;
+        }
 
-          [Column("Lozinka")]
-          public string Sifra { get; set; }
+        [Required]
+        [MaxLength(100)]
+        public string Lozinka
+        {
+            get;
+            set;
+        }
 
-          [NotMapped]
-          public string Status { get; set; }
-
-          public string Uloga { get; set; }
-     }
+        [Required]
+        [MaxLength(20)]
+        public string Uloga
+        {
+            get;
+            set;
+        }
+    }
 }

@@ -4,41 +4,170 @@ using System.Data.SqlClient;
 
 namespace KlasePodataka
 {
-     public class SPKorisnikDBKlasa
-     {
-          private string _stringKonekcije;
+    public class SPKorisnikDBKlasa
+    {
+        private readonly string connectionString;
 
-          public string StringKonekcije
-          {
-               get { return _stringKonekcije; }
-          }
+        public SPKorisnikDBKlasa(string connectionString)
+        {
+            this.connectionString = connectionString;
+        }
 
-          public SPKorisnikDBKlasa(string noviStringKonekcije)
-          {
-               _stringKonekcije = noviStringKonekcije;
-          }
+        public KorisnikKlasa ProveriKorisnika(
+            string korisnickoIme,
+            string lozinka)
+        {
+            using (SqlConnection konekcija =
+                   new SqlConnection(connectionString))
+            {
+                using (SqlCommand komanda =
+                       new SqlCommand(
+                           "dbo.ProveriKorisnika",
+                           konekcija))
+                {
+                    komanda.CommandType =
+                        CommandType.StoredProcedure;
 
-          public DataSet DajKorisnika(string korisnickoIme, string lozinka)
-          {
-               DataSet podaciDataSet = new DataSet();
+                    komanda.Parameters.Add(
+                        "@KorisnickoIme",
+                        SqlDbType.NVarChar,
+                        50
+                    ).Value = korisnickoIme;
 
-               SqlConnection konekcija = new SqlConnection(_stringKonekcije);
-               konekcija.Open();
+                    komanda.Parameters.Add(
+                        "@Lozinka",
+                        SqlDbType.NVarChar,
+                        100
+                    ).Value = lozinka;
 
-               SqlCommand komanda = new SqlCommand("DajKorisnikaPoKorisnickomImenuILozinci", konekcija);
-               komanda.CommandType = CommandType.StoredProcedure;
+                    konekcija.Open();
 
-               komanda.Parameters.Add("@KorisnickoIme", SqlDbType.NVarChar).Value = korisnickoIme;
-               komanda.Parameters.Add("@Lozinka", SqlDbType.NVarChar).Value = lozinka;
+                    using (SqlDataReader reader =
+                           komanda.ExecuteReader())
+                    {
+                        if (!reader.Read())
+                        {
+                            return null;
+                        }
 
-               SqlDataAdapter adapter = new SqlDataAdapter();
-               adapter.SelectCommand = komanda;
-               adapter.Fill(podaciDataSet);
+                        return new KorisnikKlasa
+                        {
+                            KorisnikID =
+                                Convert.ToInt32(
+                                    reader["KorisnikID"]
+                                ),
 
-               konekcija.Close();
-               konekcija.Dispose();
+                            KorisnickoIme =
+                                reader["KorisnickoIme"]
+                                    .ToString(),
 
-               return podaciDataSet;
-          }
-     }
+                            Uloga =
+                                reader["Uloga"]
+                                    .ToString()
+                        };
+                    }
+                }
+            }
+        }
+
+        public KorisnikKlasa ProveriKorisnikaPoKorisnickomImenu(
+            string korisnickoIme)
+        {
+            using (SqlConnection konekcija =
+                   new SqlConnection(connectionString))
+            {
+                using (SqlCommand komanda =
+                       new SqlCommand(
+                           @"SELECT
+                                 KorisnikID,
+                                 KorisnickoIme,
+                                 Uloga
+                             FROM dbo.Korisnici
+                             WHERE KorisnickoIme = @KorisnickoIme",
+                           konekcija))
+                {
+                    komanda.CommandType =
+                        CommandType.Text;
+
+                    komanda.Parameters.Add(
+                        "@KorisnickoIme",
+                        SqlDbType.NVarChar,
+                        50
+                    ).Value = korisnickoIme;
+
+                    konekcija.Open();
+
+                    using (SqlDataReader reader =
+                           komanda.ExecuteReader())
+                    {
+                        if (!reader.Read())
+                        {
+                            return null;
+                        }
+
+                        return new KorisnikKlasa
+                        {
+                            KorisnikID =
+                                Convert.ToInt32(
+                                    reader["KorisnikID"]
+                                ),
+
+                            KorisnickoIme =
+                                reader["KorisnickoIme"]
+                                    .ToString(),
+
+                            Uloga =
+                                reader["Uloga"]
+                                    .ToString()
+                        };
+                    }
+                }
+            }
+        }
+
+        public bool RegistrujKorisnika(
+            KorisnikKlasa korisnik)
+        {
+            using (SqlConnection konekcija =
+                   new SqlConnection(connectionString))
+            {
+                using (SqlCommand komanda =
+                       new SqlCommand(
+                           "dbo.RegistrujKorisnika",
+                           konekcija))
+                {
+                    komanda.CommandType =
+                        CommandType.StoredProcedure;
+
+                    komanda.Parameters.Add(
+                        "@KorisnickoIme",
+                        SqlDbType.NVarChar,
+                        50
+                    ).Value = korisnik.KorisnickoIme;
+
+                    komanda.Parameters.Add(
+                        "@Lozinka",
+                        SqlDbType.NVarChar,
+                        100
+                    ).Value = korisnik.Lozinka;
+
+                    komanda.Parameters.Add(
+                        "@Uloga",
+                        SqlDbType.NVarChar,
+                        20
+                    ).Value =
+                        string.IsNullOrWhiteSpace(korisnik.Uloga)
+                            ? "Korisnik"
+                            : korisnik.Uloga;
+
+                    konekcija.Open();
+
+                    int brojPromenjenihRedova =
+                        komanda.ExecuteNonQuery();
+
+                    return brojPromenjenihRedova > 0;
+                }
+            }
+        }
+    }
 }

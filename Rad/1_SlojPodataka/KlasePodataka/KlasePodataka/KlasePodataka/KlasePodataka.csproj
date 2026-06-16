@@ -59,11 +59,14 @@
   <ItemGroup>
     <Compile Include="DBUtilsTipDokumentaKlasa.cs" />
     <Compile Include="DokumentacijaZahtevaKlasa.cs" />
+    <Compile Include="EFKorisnikDBKlasa.cs" />
+    <Compile Include="ITipDokumentaRepozitorijum.cs" />
+    <Compile Include="KonkursZaPosaoContext.cs" />
     <Compile Include="KorisnikKlasa.cs" />
-    <Compile Include="OsobaKlasa.cs" />
     <Compile Include="SPDokumentacijaZahtevaDBKlasa.cs" />
     <Compile Include="SPKorisnikDBKlasa.cs" />
     <Compile Include="SPZahtevZaRegistracijuDBKlasa.cs" />
+    <Compile Include="TabelaTipDokumentaRepozitoriju.cs" />
     <Compile Include="TipDokumentaKlasa.cs" />
     <Compile Include="ZahtevZaRegistracijuKlasa.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

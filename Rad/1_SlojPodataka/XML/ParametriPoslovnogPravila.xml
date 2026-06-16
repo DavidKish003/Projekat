@@ -1,6 +1,16 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-
+﻿<?xml version="1.0" encoding="utf-8"?>
 <ParametriPoslovnogPravila>
-	<MinimalneGodineIskustva>1</MinimalneGodineIskustva>
-	<ObavezanCV>true</ObavezanCV>
+
+	<StatusPrijaveURokuIUskladjene>
+		U razmatranju
+	</StatusPrijaveURokuIUskladjene>
+
+	<StatusPrijaveVanRoka>
+		Odbijena
+	</StatusPrijaveVanRoka>
+
+	<StatusPrijaveURokuAliNeuskladjene>
+		Primljena
+	</StatusPrijaveURokuAliNeuskladjene>
+
 </ParametriPoslovnogPravila>

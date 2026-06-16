@@ -5,39 +5,62 @@ namespace PoslovnaLogika
     public class ZahtevPoslovnaLogika
     {
         public bool ProveriDaLiKandidatIspunjavaUslove(
+            DateTime datumPodnosenja,
             DateTime rokKonkursa,
-            bool cvDostavljen,
-            int godineIskustva,
-            int minimalneGodineIskustva)
+            string zanimanje,
+            string radnoMesto)
         {
-            bool konkursJeAktivan =
-                rokKonkursa.Date >= DateTime.Today;
+            bool prijavaJeUroku =
+                datumPodnosenja.Date <=
+                rokKonkursa.Date;
 
-            bool imaDovoljnoIskustva =
-                godineIskustva >= minimalneGodineIskustva;
+            if (!prijavaJeUroku)
+            {
+                return false;
+            }
 
-            return konkursJeAktivan
-                && cvDostavljen
-                && imaDovoljnoIskustva;
+            WSKadrovskiPodaci
+                .OgranicenjaZaposljavanja servis =
+                    new WSKadrovskiPodaci
+                        .OgranicenjaZaposljavanja();
+
+            servis.Url =
+                "http://localhost:1718/" +
+                "OgranicenjaZaposljavanja.asmx";
+
+            return servis
+                .DaLiZanimanjeOdgovaraRadnomMestu(
+                    zanimanje,
+                    radnoMesto
+                );
         }
 
         public string OdrediPocetniStatus(
+            DateTime datumPodnosenja,
             DateTime rokKonkursa,
-            bool cvDostavljen,
-            int godineIskustva,
-            int minimalneGodineIskustva)
+            string zanimanje,
+            string radnoMesto)
         {
-            bool ispunjavaUslove =
+            if (datumPodnosenja.Date >
+                rokKonkursa.Date)
+            {
+                return "Odbijena";
+            }
+
+            bool zanimanjeOdgovara =
                 ProveriDaLiKandidatIspunjavaUslove(
+                    datumPodnosenja,
                     rokKonkursa,
-                    cvDostavljen,
-                    godineIskustva,
-                    minimalneGodineIskustva
+                    zanimanje,
+                    radnoMesto
                 );
 
-            return ispunjavaUslove
-                ? "Primljena"
-                : "Odbijena";
+            if (zanimanjeOdgovara)
+            {
+                return "U razmatranju";
+            }
+
+            return "Primljena";
         }
     }
 }

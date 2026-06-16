@@ -1,0 +1,398 @@
+@model System.Data.DataTable
+
+@{
+ViewBag.Title = "Moje prijave";
+}
+
+<style>
+    .stranica-prijava {
+        max-width: 1150px;
+        margin: 35px auto;
+        color: #1e293b;
+    }
+
+    .zaglavlje-stranice {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 30px;
+        padding: 30px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #0f172a, #1e3a5f);
+        color: #ffffff;
+        box-shadow: 0 14px 35px rgba(15, 23, 42, 0.16);
+    }
+
+    .naslov-stranice {
+        margin: 0 0 8px;
+        font-size: 32px;
+        font-weight: 700;
+    }
+
+    .opis-stranice {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 15px;
+        line-height: 1.6;
+    }
+
+    .dugme-nova-prijava {
+        display: inline-block;
+        min-width: 155px;
+        padding: 12px 20px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+        background: #ffffff;
+        color: #0f172a;
+        text-align: center;
+        font-weight: 700;
+        text-decoration: none;
+        transition: 0.2s ease;
+    }
+
+    .dugme-nova-prijava:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+
+    .poruka-bez-prijava {
+        padding: 45px 25px;
+        border: 1px dashed #94a3b8;
+        border-radius: 18px;
+        background: #f8fafc;
+        text-align: center;
+    }
+
+    .poruka-bez-prijava h3 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        color: #334155;
+        font-size: 23px;
+        font-weight: 700;
+    }
+
+    .poruka-bez-prijava p {
+        margin-bottom: 22px;
+        color: #64748b;
+    }
+
+    .okvir-tabele {
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
+    }
+
+    .tabela-prijava {
+        width: 100%;
+        margin: 0;
+        border-collapse: collapse;
+    }
+
+    .tabela-prijava thead {
+        background: #f1f5f9;
+    }
+
+    .tabela-prijava th {
+        padding: 16px 18px;
+        border-bottom: 1px solid #cbd5e1;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        text-align: left;
+        text-transform: uppercase;
+    }
+
+    .tabela-prijava td {
+        padding: 18px;
+        border-bottom: 1px solid #e2e8f0;
+        vertical-align: middle;
+    }
+
+    .tabela-prijava tbody tr {
+        transition: 0.15s ease;
+    }
+
+    .tabela-prijava tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .tabela-prijava tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .naziv-konkursa {
+        color: #0f172a;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .datum-prijave {
+        color: #475569;
+        white-space: nowrap;
+    }
+
+    .oznaka-statusa {
+        display: inline-block;
+        padding: 7px 13px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .status-primljena {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .status-u-razmatranju {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-izabran {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-odbijena {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .status-nepoznat {
+        background: #e2e8f0;
+        color: #475569;
+    }
+
+    .dugme-detalji {
+        display: inline-block;
+        padding: 8px 15px;
+        border: 1px solid #0f766e;
+        border-radius: 8px;
+        color: #0f766e;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: 0.2s ease;
+    }
+
+    .dugme-detalji:hover {
+        background: #0f766e;
+        color: #ffffff;
+        text-decoration: none;
+    }
+
+    .poruka-uspeha {
+        margin-bottom: 22px;
+        padding: 14px 18px;
+        border: 1px solid #86efac;
+        border-radius: 10px;
+        background: #dcfce7;
+        color: #166534;
+        font-weight: 600;
+    }
+
+    @@media (max-width: 768px) {
+        .stranica-prijava {
+            margin-top: 20px;
+        }
+
+        .zaglavlje-stranice {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 25px;
+        }
+
+        .naslov-stranice {
+            font-size: 27px;
+        }
+
+        .dugme-nova-prijava {
+            width: 100%;
+        }
+
+        .okvir-tabele {
+            overflow-x: auto;
+        }
+
+        .tabela-prijava {
+            min-width: 750px;
+        }
+    }
+</style>
+
+<div class="stranica-prijava">
+
+
+@if (TempData["Poruka"] != null)
+{
+    <div class="poruka-uspeha">
+        @TempData["Poruka"]
+    </div>
+}
+
+<div class="zaglavlje-stranice">
+
+    <div>
+        <h1 class="naslov-stranice">
+            Moje prijave
+        </h1>
+
+        <p class="opis-stranice">
+            Ovde mo&#382;ete da pregledate konkurse na koje ste se
+            prijavili i trenutni status svake prijave.
+        </p>
+    </div>
+
+    <a class="dugme-nova-prijava"
+       href="@Url.Action("Dodaj", "Zahtev")">
+        Nova prijava
+    </a>
+
+</div>
+
+@if (Model == null || Model.Rows.Count == 0)
+{
+    <div class="poruka-bez-prijava">
+
+        <h3>
+            Nemate podnetih prijava
+        </h3>
+
+        <p>
+            Trenutno nemate nijednu prijavu za posao.
+            Kliknite na dugme ispod kako biste podneli prvu prijavu.
+        </p>
+
+        <a class="dugme-nova-prijava"
+           href="@Url.Action("Dodaj", "Zahtev")">
+            Podnesi prijavu
+        </a>
+
+    </div>
+}
+else
+{
+    <div class="okvir-tabele">
+
+        <table class="tabela-prijava">
+
+            <thead>
+                <tr>
+                    <th>Konkurs</th>
+                    <th>Datum podno&#353;enja</th>
+                    <th>Rok konkursa</th>
+                    <th>Status</th>
+                    <th>Akcija</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @foreach (System.Data.DataRow red in Model.Rows)
+                {
+                    var zahtevId = red["ZahtevID"];
+
+                    string status =
+                        Convert.ToString(red["StatusZahteva"]);
+
+                    string klasaStatusa =
+                        "oznaka-statusa status-nepoznat";
+
+                    if (string.Equals(
+                        status,
+                        "Primljena",
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        klasaStatusa =
+                            "oznaka-statusa status-primljena";
+                    }
+                    else if (string.Equals(
+                        status,
+                        "U razmatranju",
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        klasaStatusa =
+                            "oznaka-statusa status-u-razmatranju";
+                    }
+                    else if (string.Equals(
+                        status,
+                        "Izabran",
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        klasaStatusa =
+                            "oznaka-statusa status-izabran";
+                    }
+                    else if (
+                        string.Equals(
+                            status,
+                            "Odbijena",
+                            StringComparison.OrdinalIgnoreCase)
+                        ||
+                        string.Equals(
+                            status,
+                            "Odbijen",
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        klasaStatusa =
+                            "oznaka-statusa status-odbijena";
+                    }
+
+                    <tr>
+                        <td>
+                            <span class="naziv-konkursa">
+                                @red["NazivKonkursa"]
+                            </span>
+                        </td>
+
+                        <td class="datum-prijave">
+                            @String.Format(
+                                "{0:dd.MM.yyyy}",
+                                Convert.ToDateTime(
+                                    red["DatumPodnosenja"]
+                                )
+                            )
+                        </td>
+
+                        <td class="datum-prijave">
+                            @String.Format(
+                                "{0:dd.MM.yyyy}",
+                                Convert.ToDateTime(
+                                    red["RokKonkursa"]
+                                )
+                            )
+                        </td>
+
+                        <td>
+                            <span class="@klasaStatusa">
+                                @status
+                            </span>
+                        </td>
+
+                        <td>
+                            <a class="dugme-detalji"
+                               href="@Url.Action(
+                                   "Detalji",
+                                   "Zahtev",
+                                   new { id = zahtevId })">
+                                Detalji
+                            </a>
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+
+    </div>
+}
+
+
+</div>

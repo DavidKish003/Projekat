@@ -24,7 +24,7 @@ namespace PoslovnaLogika.WSKadrovskiPodaci {
     
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9221.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Web.Services.WebServiceBindingAttribute(Name="OgranicenjaZaposljavanjaSoap", Namespace="http://tempuri.org/")]
@@ -32,7 +32,7 @@ namespace PoslovnaLogika.WSKadrovskiPodaci {
         
         private System.Threading.SendOrPostCallback DajSvaOgranicenjaOperationCompleted;
         
-        private System.Threading.SendOrPostCallback DajMaxBrojNastavnikaOperationCompleted;
+        private System.Threading.SendOrPostCallback DaLiZanimanjeOdgovaraRadnomMestuOperationCompleted;
         
         private bool useDefaultCredentialsSetExplicitly;
         
@@ -76,7 +76,7 @@ namespace PoslovnaLogika.WSKadrovskiPodaci {
         public event DajSvaOgranicenjaCompletedEventHandler DajSvaOgranicenjaCompleted;
         
         /// <remarks/>
-        public event DajMaxBrojNastavnikaCompletedEventHandler DajMaxBrojNastavnikaCompleted;
+        public event DaLiZanimanjeOdgovaraRadnomMestuCompletedEventHandler DaLiZanimanjeOdgovaraRadnomMestuCompleted;
         
         /// <remarks/>
         [System.Web.Services.Protocols.SoapDocumentMethodAttribute("http://tempuri.org/DajSvaOgranicenja", RequestNamespace="http://tempuri.org/", ResponseNamespace="http://tempuri.org/", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Wrapped)]
@@ -106,31 +106,33 @@ namespace PoslovnaLogika.WSKadrovskiPodaci {
         }
         
         /// <remarks/>
-        [System.Web.Services.Protocols.SoapDocumentMethodAttribute("http://tempuri.org/DajMaxBrojNastavnika", RequestNamespace="http://tempuri.org/", ResponseNamespace="http://tempuri.org/", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Wrapped)]
-        public int DajMaxBrojNastavnika(string pomSifraZvanja) {
-            object[] results = this.Invoke("DajMaxBrojNastavnika", new object[] {
-                        pomSifraZvanja});
-            return ((int)(results[0]));
+        [System.Web.Services.Protocols.SoapDocumentMethodAttribute("http://tempuri.org/DaLiZanimanjeOdgovaraRadnomMestu", RequestNamespace="http://tempuri.org/", ResponseNamespace="http://tempuri.org/", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Wrapped)]
+        public bool DaLiZanimanjeOdgovaraRadnomMestu(string zanimanje, string radnoMesto) {
+            object[] results = this.Invoke("DaLiZanimanjeOdgovaraRadnomMestu", new object[] {
+                        zanimanje,
+                        radnoMesto});
+            return ((bool)(results[0]));
         }
         
         /// <remarks/>
-        public void DajMaxBrojNastavnikaAsync(string pomSifraZvanja) {
-            this.DajMaxBrojNastavnikaAsync(pomSifraZvanja, null);
+        public void DaLiZanimanjeOdgovaraRadnomMestuAsync(string zanimanje, string radnoMesto) {
+            this.DaLiZanimanjeOdgovaraRadnomMestuAsync(zanimanje, radnoMesto, null);
         }
         
         /// <remarks/>
-        public void DajMaxBrojNastavnikaAsync(string pomSifraZvanja, object userState) {
-            if ((this.DajMaxBrojNastavnikaOperationCompleted == null)) {
-                this.DajMaxBrojNastavnikaOperationCompleted = new System.Threading.SendOrPostCallback(this.OnDajMaxBrojNastavnikaOperationCompleted);
+        public void DaLiZanimanjeOdgovaraRadnomMestuAsync(string zanimanje, string radnoMesto, object userState) {
+            if ((this.DaLiZanimanjeOdgovaraRadnomMestuOperationCompleted == null)) {
+                this.DaLiZanimanjeOdgovaraRadnomMestuOperationCompleted = new System.Threading.SendOrPostCallback(this.OnDaLiZanimanjeOdgovaraRadnomMestuOperationCompleted);
             }
-            this.InvokeAsync("DajMaxBrojNastavnika", new object[] {
-                        pomSifraZvanja}, this.DajMaxBrojNastavnikaOperationCompleted, userState);
+            this.InvokeAsync("DaLiZanimanjeOdgovaraRadnomMestu", new object[] {
+                        zanimanje,
+                        radnoMesto}, this.DaLiZanimanjeOdgovaraRadnomMestuOperationCompleted, userState);
         }
         
-        private void OnDajMaxBrojNastavnikaOperationCompleted(object arg) {
-            if ((this.DajMaxBrojNastavnikaCompleted != null)) {
+        private void OnDaLiZanimanjeOdgovaraRadnomMestuOperationCompleted(object arg) {
+            if ((this.DaLiZanimanjeOdgovaraRadnomMestuCompleted != null)) {
                 System.Web.Services.Protocols.InvokeCompletedEventArgs invokeArgs = ((System.Web.Services.Protocols.InvokeCompletedEventArgs)(arg));
-                this.DajMaxBrojNastavnikaCompleted(this, new DajMaxBrojNastavnikaCompletedEventArgs(invokeArgs.Results, invokeArgs.Error, invokeArgs.Cancelled, invokeArgs.UserState));
+                this.DaLiZanimanjeOdgovaraRadnomMestuCompleted(this, new DaLiZanimanjeOdgovaraRadnomMestuCompletedEventArgs(invokeArgs.Results, invokeArgs.Error, invokeArgs.Cancelled, invokeArgs.UserState));
             }
         }
         
@@ -154,11 +156,11 @@ namespace PoslovnaLogika.WSKadrovskiPodaci {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9221.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
     public delegate void DajSvaOgranicenjaCompletedEventHandler(object sender, DajSvaOgranicenjaCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9221.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class DajSvaOgranicenjaCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
@@ -180,27 +182,27 @@ namespace PoslovnaLogika.WSKadrovskiPodaci {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9221.0")]
-    public delegate void DajMaxBrojNastavnikaCompletedEventHandler(object sender, DajMaxBrojNastavnikaCompletedEventArgs e);
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
+    public delegate void DaLiZanimanjeOdgovaraRadnomMestuCompletedEventHandler(object sender, DaLiZanimanjeOdgovaraRadnomMestuCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9221.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.9037.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    public partial class DajMaxBrojNastavnikaCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+    public partial class DaLiZanimanjeOdgovaraRadnomMestuCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
         
         private object[] results;
         
-        internal DajMaxBrojNastavnikaCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+        internal DaLiZanimanjeOdgovaraRadnomMestuCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
                 base(exception, cancelled, userState) {
             this.results = results;
         }
         
         /// <remarks/>
-        public int Result {
+        public bool Result {
             get {
                 this.RaiseExceptionIfNecessary();
-                return ((int)(this.results[0]));
+                return ((bool)(this.results[0]));
             }
         }
     }

@@ -1,15 +1,44 @@
-﻿<?xml version="1.0" standalone="yes"?>
-<SpisakOgranicenja>
-  <OgranicenjeZvanja>
-    <SifraZvanja>d</SifraZvanja>
-    <MaxBrNastavnika>3</MaxBrNastavnika>
-  </OgranicenjeZvanja>
-<OgranicenjeZvanja>
-    <SifraZvanja>v</SifraZvanja>
-    <MaxBrNastavnika>3</MaxBrNastavnika>
-  </OgranicenjeZvanja>
-<OgranicenjeZvanja>
-    <SifraZvanja>r</SifraZvanja>
-    <MaxBrNastavnika>3</MaxBrNastavnika>
-  </OgranicenjeZvanja>
-</SpisakOgranicenja>
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<SpisakUskladjenosti>
+
+	<UskladjenostZanimanja>
+		<Zanimanje>Elektrotehničar informacionih tehnologija</Zanimanje>
+		<RadnoMesto>Junior programer</RadnoMesto>
+	</UskladjenostZanimanja>
+
+	<UskladjenostZanimanja>
+		<Zanimanje>Elektrotehničar informacionih tehnologija</Zanimanje>
+		<RadnoMesto>Softverski tester</RadnoMesto>
+	</UskladjenostZanimanja>
+
+	<UskladjenostZanimanja>
+		<Zanimanje>Elektrotehničar računara</Zanimanje>
+		<RadnoMesto>IT podrška</RadnoMesto>
+	</UskladjenostZanimanja>
+
+	<UskladjenostZanimanja>
+		<Zanimanje>Ekonomski tehničar</Zanimanje>
+		<RadnoMesto>Referent finansija</RadnoMesto>
+	</UskladjenostZanimanja>
+
+	<UskladjenostZanimanja>
+		<Zanimanje>Ekonomski tehničar</Zanimanje>
+		<RadnoMesto>Knjigovođa</RadnoMesto>
+	</UskladjenostZanimanja>
+
+	<UskladjenostZanimanja>
+		<Zanimanje>Mašinski tehničar</Zanimanje>
+		<RadnoMesto>Tehničar održavanja</RadnoMesto>
+	</UskladjenostZanimanja>
+
+	<UskladjenostZanimanja>
+		<Zanimanje>Mašinski tehničar</Zanimanje>
+		<RadnoMesto>CNC operater</RadnoMesto>
+	</UskladjenostZanimanja>
+
+	<UskladjenostZanimanja>
+		<Zanimanje>Medicinska sestra - tehničar</Zanimanje>
+		<RadnoMesto>Medicinska sestra</RadnoMesto>
+	</UskladjenostZanimanja>
+
+</SpisakUskladjenosti>

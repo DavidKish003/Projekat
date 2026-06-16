@@ -1,0 +1,109 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1" />
+
+    <title>
+        @ViewBag.Title - Konkursi za posao
+    </title>
+
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+        <div class="container">
+
+            @Html.ActionLink(
+                     "Konkursi za posao",
+                     "Index",
+                     "Home",
+                     null,
+                     new { @class = "navbar-brand" }
+                 )
+
+            <div class="navbar-nav">
+
+                <a class="nav-link"
+                   href="@Url.Action("Index", "Home")">
+                    Početna
+                </a>
+
+                @if (Session["KorisnikID"] == null)
+                {
+                    <a class="nav-link"
+                       href="@Url.Action("Index", "Login")">
+                        Prijava
+                    </a>
+
+                    <a class="nav-link"
+                       href="@Url.Action("Registracija", "Login")">
+                        Registracija
+                    </a>
+                }
+                else
+                {
+                    bool jeAdmin =
+                        string.Equals(
+                            Convert.ToString(Session["Uloga"]),
+                            "Admin",
+                            StringComparison.OrdinalIgnoreCase
+                        );
+
+                    if (jeAdmin)
+                    {
+                        <a class="nav-link"
+                           href="@Url.Action("Index", "Zahtev")">
+                            Sve prijave
+                        </a>
+                    }
+                    else
+                    {
+                        <a class="nav-link"
+                           href="@Url.Action("Dodaj", "Zahtev")">
+                            Podnesi prijavu
+                        </a>
+                    }
+
+                    <a class="nav-link"
+                       href="@Url.Action("Odjava", "Login")">
+                        Odjava
+                    </a>
+                }
+
+            </div>
+
+        </div>
+    </nav>
+
+    <div class="container body-content py-4">
+
+        @RenderBody()
+
+        <hr />
+
+        <footer>
+            <p>
+                &copy; @DateTime.Now.Year -
+                Sistem za prijavu kandidata i obradu konkursa
+            </p>
+        </footer>
+
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+
+    @RenderSection(
+            "scripts",
+            required: false
+        )
+
+</body>
+</html>

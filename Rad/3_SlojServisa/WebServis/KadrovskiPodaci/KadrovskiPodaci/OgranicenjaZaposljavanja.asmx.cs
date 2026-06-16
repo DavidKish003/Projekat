@@ -1,47 +1,89 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+using System.Data;
 using System.Web.Services;
-//
-using System.Data; 
 
 namespace KadrovskiPodaci
 {
-    /// <summary>
-    /// Summary description for Service1
-    /// </summary>
     [WebService(Namespace = "http://tempuri.org/")]
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
     [System.ComponentModel.ToolboxItem(false)]
-    // To allow this Web Service to be called from script, using ASP.NET AJAX, uncomment the following line. 
-    // [System.Web.Script.Services.ScriptService]
-    public class OgranicenjaZaposljavanja : System.Web.Services.WebService
+    public class OgranicenjaZaposljavanja : WebService
     {
-
         [WebMethod]
         public DataSet DajSvaOgranicenja()
         {
-            DataSet dsOgranicenja = new DataSet();
-            dsOgranicenja.ReadXml(Server.MapPath("~/") + "XML/OgranicenjaSistematizacije.XML");
+            DataSet skupUskladjenosti = new DataSet();
 
-            return dsOgranicenja;
+            skupUskladjenosti.ReadXml(
+                Server.MapPath("~/") +
+                "XML/OgranicenjaSistematizacije.XML"
+            );
+
+            return skupUskladjenosti;
         }
-
 
         [WebMethod]
-        public int DajMaxBrojNastavnika(string pomSifraZvanja)
+        public bool DaLiZanimanjeOdgovaraRadnomMestu(
+            string zanimanje,
+            string radnoMesto)
         {
-            int MaxBrojNastavnika = 0;
-            DataSet dsOgranicenja = new DataSet();
-            dsOgranicenja.ReadXml(Server.MapPath("~/") + "XML/OgranicenjaSistematizacije.XML");
-            // filtriranje dataset-a
-            DataRow[] result = dsOgranicenja.Tables[0].Select("SifraZvanja='" + pomSifraZvanja + "'");
-            MaxBrojNastavnika = int.Parse (result[0].ItemArray[1].ToString());
+            if (string.IsNullOrEmpty(zanimanje) ||
+                string.IsNullOrEmpty(radnoMesto))
+            {
+                return false;
+            }
 
-            return MaxBrojNastavnika;
+            DataSet skupUskladjenosti =
+                DajSvaOgranicenja();
+
+            if (!skupUskladjenosti.Tables.Contains(
+                    "UskladjenostZanimanja"))
+            {
+                return false;
+            }
+
+            string trazenoZanimanje =
+                zanimanje.Trim();
+
+            string trazenoRadnoMesto =
+                radnoMesto.Trim();
+
+            foreach (DataRow red in
+                     skupUskladjenosti.Tables[
+                         "UskladjenostZanimanja"
+                     ].Rows)
+            {
+                string evidentiranoZanimanje =
+                    Convert.ToString(
+                        red["Zanimanje"]
+                    ).Trim();
+
+                string evidentiranoRadnoMesto =
+                    Convert.ToString(
+                        red["RadnoMesto"]
+                    ).Trim();
+
+                bool istoZanimanje =
+                    string.Equals(
+                        trazenoZanimanje,
+                        evidentiranoZanimanje,
+                        StringComparison.OrdinalIgnoreCase
+                    );
+
+                bool istoRadnoMesto =
+                    string.Equals(
+                        trazenoRadnoMesto,
+                        evidentiranoRadnoMesto,
+                        StringComparison.OrdinalIgnoreCase
+                    );
+
+                if (istoZanimanje && istoRadnoMesto)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
-
-       
     }
 }

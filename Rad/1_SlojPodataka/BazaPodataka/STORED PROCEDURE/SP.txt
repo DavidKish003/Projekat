@@ -1,32 +1,671 @@
 ﻿USE KonkursiZaPosao;
 GO
-CREATE OR ALTER PROCEDURE dbo.DajSveZahteveZaRegistraciju AS SELECT * FROM dbo.PrijavaKandidata ORDER BY DatumPodnosenja DESC;
+
+/* =========================================================
+   SVE PRIJAVE
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.DajSveZahteveZaRegistraciju
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        p.ZahtevID,
+        p.KorisnikID,
+        p.ImePrezime,
+        p.Email,
+        p.KontaktTelefon,
+        p.PoslednjaSkola,
+        p.MestoSkole,
+        p.Zanimanje,
+        p.StepenObrazovanja,
+        p.NazivKonkursa,
+        p.RadnoMesto,
+        p.GodineIskustva,
+        p.MotivacionoPismo,
+        p.DatumPodnosenja,
+        p.RokKonkursa,
+        p.StatusZahteva,
+        p.IspunjavaOsnovneUslove
+    FROM dbo.PrijavaKandidata AS p
+    ORDER BY
+        p.DatumPodnosenja DESC,
+        p.ZahtevID DESC;
+END;
 GO
-CREATE OR ALTER PROCEDURE dbo.DajZahteveZaRegistracijuSaFilterom @Filter NVARCHAR(150) AS
-SELECT * FROM dbo.PrijavaKandidata WHERE ImePrezime LIKE N'%'+@Filter+N'%' OR NazivKonkursa LIKE N'%'+@Filter+N'%' OR Email LIKE N'%'+@Filter+N'%' ORDER BY DatumPodnosenja DESC;
+
+/* =========================================================
+   PRETRAGA PRIJAVA
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.DajZahteveZaRegistracijuSaFilterom
+    @Filter NVARCHAR(150)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @VrednostFiltera NVARCHAR(154);
+
+    SET @VrednostFiltera =
+        N'%' + ISNULL(LTRIM(RTRIM(@Filter)), N'') + N'%';
+
+    SELECT
+        p.ZahtevID,
+        p.KorisnikID,
+        p.ImePrezime,
+        p.Email,
+        p.KontaktTelefon,
+        p.PoslednjaSkola,
+        p.MestoSkole,
+        p.Zanimanje,
+        p.StepenObrazovanja,
+        p.NazivKonkursa,
+        p.RadnoMesto,
+        p.GodineIskustva,
+        p.MotivacionoPismo,
+        p.DatumPodnosenja,
+        p.RokKonkursa,
+        p.StatusZahteva,
+        p.IspunjavaOsnovneUslove
+    FROM dbo.PrijavaKandidata AS p
+    WHERE
+        p.ImePrezime LIKE @VrednostFiltera
+        OR p.Email LIKE @VrednostFiltera
+        OR p.KontaktTelefon LIKE @VrednostFiltera
+        OR p.PoslednjaSkola LIKE @VrednostFiltera
+        OR p.MestoSkole LIKE @VrednostFiltera
+        OR p.Zanimanje LIKE @VrednostFiltera
+        OR p.StepenObrazovanja LIKE @VrednostFiltera
+        OR p.NazivKonkursa LIKE @VrednostFiltera
+        OR p.RadnoMesto LIKE @VrednostFiltera
+        OR p.StatusZahteva LIKE @VrednostFiltera
+    ORDER BY
+        p.DatumPodnosenja DESC,
+        p.ZahtevID DESC;
+END;
 GO
-CREATE OR ALTER PROCEDURE dbo.DajZahtevZaRegistracijuPoID @ZahtevID INT AS SELECT * FROM dbo.PrijavaKandidata WHERE ZahtevID=@ZahtevID;
+
+/* =========================================================
+   PRIJAVA PO ID-U
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.DajZahtevZaRegistracijuPoID
+    @ZahtevID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        p.ZahtevID,
+        p.KorisnikID,
+        p.ImePrezime,
+        p.Email,
+        p.KontaktTelefon,
+        p.PoslednjaSkola,
+        p.MestoSkole,
+        p.Zanimanje,
+        p.StepenObrazovanja,
+        p.NazivKonkursa,
+        p.RadnoMesto,
+        p.GodineIskustva,
+        p.MotivacionoPismo,
+        p.DatumPodnosenja,
+        p.RokKonkursa,
+        p.StatusZahteva,
+        p.IspunjavaOsnovneUslove
+    FROM dbo.PrijavaKandidata AS p
+    WHERE p.ZahtevID = @ZahtevID;
+END;
 GO
-CREATE OR ALTER PROCEDURE dbo.DajZahtevZaRegistracijuSaDokumentacijom @ZahtevID INT AS
-SELECT p.*,d.DokumentacijaID,d.TipDokumentaID,t.Naziv NazivDokumenta,t.Obavezan,d.Dostavljen,d.Napomena
-FROM dbo.PrijavaKandidata p LEFT JOIN dbo.DokumentacijaPrijave d ON p.ZahtevID=d.ZahtevID LEFT JOIN dbo.TipDokumenta t ON d.TipDokumentaID=t.TipDokumentaID
-WHERE p.ZahtevID=@ZahtevID;
+
+/* =========================================================
+   PRIJAVA SA SVOM DOKUMENTACIJOM
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.DajZahtevZaRegistracijuSaDokumentacijom
+    @ZahtevID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        p.ZahtevID,
+        p.KorisnikID,
+        p.ImePrezime,
+        p.Email,
+        p.KontaktTelefon,
+        p.PoslednjaSkola,
+        p.MestoSkole,
+        p.Zanimanje,
+        p.StepenObrazovanja,
+        p.NazivKonkursa,
+        p.RadnoMesto,
+        p.GodineIskustva,
+        p.MotivacionoPismo,
+        p.DatumPodnosenja,
+        p.RokKonkursa,
+        p.StatusZahteva,
+        p.IspunjavaOsnovneUslove,
+
+        ISNULL(d.DokumentacijaID, 0)
+            AS DokumentacijaID,
+
+        t.TipDokumentaID,
+
+        t.Naziv
+            AS NazivDokumenta,
+
+        t.Obavezan,
+
+        ISNULL(d.Dostavljen, 0)
+            AS Dostavljen,
+
+        ISNULL(d.Napomena, N'')
+            AS Napomena
+
+    FROM dbo.PrijavaKandidata AS p
+
+    CROSS JOIN dbo.TipDokumenta AS t
+
+    LEFT JOIN dbo.DokumentacijaPrijave AS d
+        ON d.ZahtevID = p.ZahtevID
+        AND d.TipDokumentaID = t.TipDokumentaID
+
+    WHERE p.ZahtevID = @ZahtevID
+
+    ORDER BY t.TipDokumentaID;
+END;
 GO
+
+/* =========================================================
+   DODAVANJE NOVE PRIJAVE
+   ========================================================= */
+
 CREATE OR ALTER PROCEDURE dbo.DodajNoviZahtevZaRegistraciju
- @ImePrezime NVARCHAR(100),@Email NVARCHAR(100),@KontaktTelefon NVARCHAR(20),@NazivKonkursa NVARCHAR(150),@StepenObrazovanja NVARCHAR(80),@GodineIskustva INT,@MotivacionoPismo NVARCHAR(MAX),@DatumPodnosenja DATE,@RokKonkursa DATE,@StatusZahteva NVARCHAR(30),@IspunjavaOsnovneUslove BIT AS
-BEGIN INSERT dbo.PrijavaKandidata VALUES(@ImePrezime,@Email,@KontaktTelefon,@NazivKonkursa,@StepenObrazovanja,@GodineIskustva,@MotivacionoPismo,@DatumPodnosenja,@RokKonkursa,@StatusZahteva,@IspunjavaOsnovneUslove); SELECT SCOPE_IDENTITY(); END;
+    @KorisnikID INT,
+    @ImePrezime NVARCHAR(100),
+    @Email NVARCHAR(100),
+    @KontaktTelefon NVARCHAR(20),
+    @PoslednjaSkola NVARCHAR(150),
+    @MestoSkole NVARCHAR(100) = NULL,
+    @Zanimanje NVARCHAR(150),
+    @StepenObrazovanja NVARCHAR(80),
+    @NazivKonkursa NVARCHAR(150),
+    @RadnoMesto NVARCHAR(150),
+    @GodineIskustva INT,
+    @MotivacionoPismo NVARCHAR(MAX) = NULL,
+    @DatumPodnosenja DATE,
+    @RokKonkursa DATE,
+    @StatusZahteva NVARCHAR(30),
+    @IspunjavaOsnovneUslove BIT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    IF @GodineIskustva < 0 OR @GodineIskustva > 50
+    BEGIN
+        THROW 50001,
+            N'Godine iskustva moraju biti između 0 i 50.',
+            1;
+    END;
+
+    IF NULLIF(LTRIM(RTRIM(@ImePrezime)), N'') IS NULL
+    BEGIN
+        THROW 50002,
+            N'Ime i prezime su obavezni.',
+            1;
+    END;
+
+    IF NULLIF(LTRIM(RTRIM(@Email)), N'') IS NULL
+    BEGIN
+        THROW 50003,
+            N'E-mail adresa je obavezna.',
+            1;
+    END;
+
+    IF NULLIF(LTRIM(RTRIM(@PoslednjaSkola)), N'') IS NULL
+    BEGIN
+        THROW 50004,
+            N'Poslednja završena škola je obavezna.',
+            1;
+    END;
+
+    IF NULLIF(LTRIM(RTRIM(@Zanimanje)), N'') IS NULL
+    BEGIN
+        THROW 50005,
+            N'Stečeno zanimanje je obavezno.',
+            1;
+    END;
+
+    IF NULLIF(LTRIM(RTRIM(@RadnoMesto)), N'') IS NULL
+    BEGIN
+        THROW 50006,
+            N'Radno mesto je obavezno.',
+            1;
+    END;
+
+    INSERT INTO dbo.PrijavaKandidata
+    (
+        KorisnikID,
+        ImePrezime,
+        Email,
+        KontaktTelefon,
+        PoslednjaSkola,
+        MestoSkole,
+        Zanimanje,
+        StepenObrazovanja,
+        NazivKonkursa,
+        RadnoMesto,
+        GodineIskustva,
+        MotivacionoPismo,
+        DatumPodnosenja,
+        RokKonkursa,
+        StatusZahteva,
+        IspunjavaOsnovneUslove
+    )
+    VALUES
+    (
+        @KorisnikID,
+        LTRIM(RTRIM(@ImePrezime)),
+        LTRIM(RTRIM(@Email)),
+        LTRIM(RTRIM(@KontaktTelefon)),
+        LTRIM(RTRIM(@PoslednjaSkola)),
+        NULLIF(LTRIM(RTRIM(@MestoSkole)), N''),
+        LTRIM(RTRIM(@Zanimanje)),
+        LTRIM(RTRIM(@StepenObrazovanja)),
+        LTRIM(RTRIM(@NazivKonkursa)),
+        LTRIM(RTRIM(@RadnoMesto)),
+        @GodineIskustva,
+        NULLIF(LTRIM(RTRIM(@MotivacionoPismo)), N''),
+        @DatumPodnosenja,
+        @RokKonkursa,
+        @StatusZahteva,
+        @IspunjavaOsnovneUslove
+    );
+
+    SELECT
+        CAST(SCOPE_IDENTITY() AS INT)
+            AS ZahtevID;
+END;
 GO
+
+/* =========================================================
+   IZMENA PRIJAVE
+   ========================================================= */
+
 CREATE OR ALTER PROCEDURE dbo.IzmeniZahtevZaRegistraciju
- @ZahtevID INT,@ImePrezime NVARCHAR(100),@Email NVARCHAR(100),@KontaktTelefon NVARCHAR(20),@NazivKonkursa NVARCHAR(150),@StepenObrazovanja NVARCHAR(80),@GodineIskustva INT,@MotivacionoPismo NVARCHAR(MAX),@DatumPodnosenja DATE,@RokKonkursa DATE,@StatusZahteva NVARCHAR(30),@IspunjavaOsnovneUslove BIT AS
-UPDATE dbo.PrijavaKandidata SET ImePrezime=@ImePrezime,Email=@Email,KontaktTelefon=@KontaktTelefon,NazivKonkursa=@NazivKonkursa,StepenObrazovanja=@StepenObrazovanja,GodineIskustva=@GodineIskustva,MotivacionoPismo=@MotivacionoPismo,DatumPodnosenja=@DatumPodnosenja,RokKonkursa=@RokKonkursa,StatusZahteva=@StatusZahteva,IspunjavaOsnovneUslove=@IspunjavaOsnovneUslove WHERE ZahtevID=@ZahtevID;
+    @ZahtevID INT,
+    @ImePrezime NVARCHAR(100),
+    @Email NVARCHAR(100),
+    @KontaktTelefon NVARCHAR(20),
+    @PoslednjaSkola NVARCHAR(150),
+    @MestoSkole NVARCHAR(100) = NULL,
+    @Zanimanje NVARCHAR(150),
+    @StepenObrazovanja NVARCHAR(80),
+    @NazivKonkursa NVARCHAR(150),
+    @RadnoMesto NVARCHAR(150),
+    @GodineIskustva INT,
+    @MotivacionoPismo NVARCHAR(MAX) = NULL,
+    @DatumPodnosenja DATE,
+    @RokKonkursa DATE,
+    @StatusZahteva NVARCHAR(30),
+    @IspunjavaOsnovneUslove BIT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    IF @GodineIskustva < 0 OR @GodineIskustva > 50
+    BEGIN
+        THROW 50011,
+            N'Godine iskustva moraju biti između 0 i 50.',
+            1;
+    END;
+
+    IF NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.PrijavaKandidata
+        WHERE ZahtevID = @ZahtevID
+    )
+    BEGIN
+        THROW 50012,
+            N'Prijava sa prosleđenim ID-em ne postoji.',
+            1;
+    END;
+
+    UPDATE dbo.PrijavaKandidata
+    SET
+        ImePrezime =
+            LTRIM(RTRIM(@ImePrezime)),
+
+        Email =
+            LTRIM(RTRIM(@Email)),
+
+        KontaktTelefon =
+            LTRIM(RTRIM(@KontaktTelefon)),
+
+        PoslednjaSkola =
+            LTRIM(RTRIM(@PoslednjaSkola)),
+
+        MestoSkole =
+            NULLIF(
+                LTRIM(RTRIM(@MestoSkole)),
+                N''
+            ),
+
+        Zanimanje =
+            LTRIM(RTRIM(@Zanimanje)),
+
+        StepenObrazovanja =
+            LTRIM(RTRIM(@StepenObrazovanja)),
+
+        NazivKonkursa =
+            LTRIM(RTRIM(@NazivKonkursa)),
+
+        RadnoMesto =
+            LTRIM(RTRIM(@RadnoMesto)),
+
+        GodineIskustva =
+            @GodineIskustva,
+
+        MotivacionoPismo =
+            NULLIF(
+                LTRIM(RTRIM(@MotivacionoPismo)),
+                N''
+            ),
+
+        DatumPodnosenja =
+            @DatumPodnosenja,
+
+        RokKonkursa =
+            @RokKonkursa,
+
+        StatusZahteva =
+            @StatusZahteva,
+
+        IspunjavaOsnovneUslove =
+            @IspunjavaOsnovneUslove
+
+    WHERE ZahtevID = @ZahtevID;
+END;
 GO
-CREATE OR ALTER PROCEDURE dbo.ObrisiZahtevZaRegistraciju @ZahtevID INT AS DELETE dbo.PrijavaKandidata WHERE ZahtevID=@ZahtevID;
+
+/* =========================================================
+   BRISANJE PRIJAVE
+   Dokumentacija se briše automatski preko ON DELETE CASCADE.
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.ObrisiZahtevZaRegistraciju
+    @ZahtevID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DELETE FROM dbo.PrijavaKandidata
+    WHERE ZahtevID = @ZahtevID;
+END;
 GO
-CREATE OR ALTER PROCEDURE dbo.PromeniStatusZahteva @ZahtevID INT,@StatusZahteva NVARCHAR(30) AS UPDATE dbo.PrijavaKandidata SET StatusZahteva=@StatusZahteva WHERE ZahtevID=@ZahtevID;
+
+/* =========================================================
+   PROMENA STATUSA
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.PromeniStatusZahteva
+    @ZahtevID INT,
+    @StatusZahteva NVARCHAR(30)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.PrijavaKandidata
+    SET StatusZahteva = @StatusZahteva
+    WHERE ZahtevID = @ZahtevID;
+
+    IF @@ROWCOUNT = 0
+    BEGIN
+        THROW 50021,
+            N'Prijava sa prosleđenim ID-em ne postoji.',
+            1;
+    END;
+END;
 GO
-CREATE OR ALTER PROCEDURE dbo.DodajDokumentacijuZahteva @ZahtevID INT,@TipDokumentaID INT,@Dostavljen BIT,@Napomena NVARCHAR(200) AS INSERT dbo.DokumentacijaPrijave VALUES(@ZahtevID,@TipDokumentaID,@Dostavljen,@Napomena);
+
+/* =========================================================
+   DODAVANJE ILI AŽURIRANJE DOKUMENTACIJE
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.DodajDokumentacijuZahteva
+    @ZahtevID INT,
+    @TipDokumentaID INT,
+    @Dostavljen BIT,
+    @Napomena NVARCHAR(200) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS
+    (
+        SELECT 1
+        FROM dbo.DokumentacijaPrijave
+        WHERE ZahtevID = @ZahtevID
+          AND TipDokumentaID = @TipDokumentaID
+    )
+    BEGIN
+        UPDATE dbo.DokumentacijaPrijave
+        SET
+            Dostavljen = @Dostavljen,
+            Napomena =
+                NULLIF(
+                    LTRIM(RTRIM(@Napomena)),
+                    N''
+                )
+        WHERE ZahtevID = @ZahtevID
+          AND TipDokumentaID = @TipDokumentaID;
+    END;
+    ELSE
+    BEGIN
+        INSERT INTO dbo.DokumentacijaPrijave
+        (
+            ZahtevID,
+            TipDokumentaID,
+            Dostavljen,
+            Napomena
+        )
+        VALUES
+        (
+            @ZahtevID,
+            @TipDokumentaID,
+            @Dostavljen,
+            NULLIF(
+                LTRIM(RTRIM(@Napomena)),
+                N''
+            )
+        );
+    END;
+END;
 GO
-CREATE OR ALTER PROCEDURE dbo.ObrisiDokumentacijuZaZahtev @ZahtevID INT AS DELETE dbo.DokumentacijaPrijave WHERE ZahtevID=@ZahtevID;
+
+/* =========================================================
+   BRISANJE DOKUMENTACIJE PRIJAVE
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.ObrisiDokumentacijuZaZahtev
+    @ZahtevID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DELETE FROM dbo.DokumentacijaPrijave
+    WHERE ZahtevID = @ZahtevID;
+END;
 GO
-CREATE OR ALTER PROCEDURE dbo.DajKorisnikaPoKorisnickomImenuILozinci @KorisnickoIme NVARCHAR(50),@Lozinka NVARCHAR(100) AS SELECT * FROM dbo.Korisnici WHERE KorisnickoIme=@KorisnickoIme AND Lozinka=@Lozinka;
+
+/* =========================================================
+   TIPOVI DOKUMENATA
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.DajSveTipoveDokumenata
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        TipDokumentaID,
+        Naziv,
+        Obavezan
+    FROM dbo.TipDokumenta
+    ORDER BY TipDokumentaID;
+END;
+GO
+
+/* =========================================================
+   PRIJAVE KONKRETNOG KORISNIKA
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.DajPrijaveKorisnika
+    @KorisnikID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        p.ZahtevID,
+        p.KorisnikID,
+        p.ImePrezime,
+        p.Email,
+        p.KontaktTelefon,
+        p.PoslednjaSkola,
+        p.MestoSkole,
+        p.Zanimanje,
+        p.StepenObrazovanja,
+        p.NazivKonkursa,
+        p.RadnoMesto,
+        p.GodineIskustva,
+        p.MotivacionoPismo,
+        p.DatumPodnosenja,
+        p.RokKonkursa,
+        p.StatusZahteva,
+        p.IspunjavaOsnovneUslove
+    FROM dbo.PrijavaKandidata AS p
+    WHERE p.KorisnikID = @KorisnikID
+    ORDER BY
+        p.DatumPodnosenja DESC,
+        p.ZahtevID DESC;
+END;
+GO
+
+/* =========================================================
+   PROVERA KORISNIKA
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.ProveriKorisnika
+    @KorisnickoIme NVARCHAR(50),
+    @Lozinka NVARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        KorisnikID,
+        KorisnickoIme,
+        Uloga
+    FROM dbo.Korisnici
+    WHERE KorisnickoIme = @KorisnickoIme
+      AND Lozinka = @Lozinka;
+END;
+GO
+
+/* =========================================================
+   LOGIN PROCEDURA SA STARIM NAZIVOM
+   Ostavlja se radi kompatibilnosti sa postojećim C# kodom.
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.DajKorisnikaPoKorisnickomImenuILozinci
+    @KorisnickoIme NVARCHAR(50),
+    @Lozinka NVARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        KorisnikID,
+        KorisnickoIme,
+        Uloga
+    FROM dbo.Korisnici
+    WHERE KorisnickoIme = @KorisnickoIme
+      AND Lozinka = @Lozinka;
+END;
+GO
+
+/* =========================================================
+   REGISTRACIJA KORISNIKA
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE dbo.RegistrujKorisnika
+    @KorisnickoIme NVARCHAR(50),
+    @Lozinka NVARCHAR(100),
+    @Uloga NVARCHAR(20) = N'Korisnik'
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NULLIF(
+        LTRIM(RTRIM(@KorisnickoIme)),
+        N''
+    ) IS NULL
+    BEGIN
+        THROW 50031,
+            N'Korisničko ime je obavezno.',
+            1;
+    END;
+
+    IF NULLIF(
+        LTRIM(RTRIM(@Lozinka)),
+        N''
+    ) IS NULL
+    BEGIN
+        THROW 50032,
+            N'Lozinka je obavezna.',
+            1;
+    END;
+
+    IF EXISTS
+    (
+        SELECT 1
+        FROM dbo.Korisnici
+        WHERE KorisnickoIme =
+            LTRIM(RTRIM(@KorisnickoIme))
+    )
+    BEGIN
+        SELECT
+            CAST(0 AS BIT) AS Uspeh,
+            N'Korisničko ime već postoji.'
+                AS Poruka;
+
+        RETURN;
+    END;
+
+    INSERT INTO dbo.Korisnici
+    (
+        KorisnickoIme,
+        Lozinka,
+        Uloga
+    )
+    VALUES
+    (
+        LTRIM(RTRIM(@KorisnickoIme)),
+        @Lozinka,
+        @Uloga
+    );
+
+    SELECT
+        CAST(1 AS BIT) AS Uspeh,
+        N'Korisnik je uspešno registrovan.'
+            AS Poruka,
+        CAST(SCOPE_IDENTITY() AS INT)
+            AS KorisnikID;
+END;
 GO

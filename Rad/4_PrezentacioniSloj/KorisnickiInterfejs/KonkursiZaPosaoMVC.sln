@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.8.11904.113 insiders
+VisualStudioVersion = 18.8.11904.113
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KonkursiZaPosaoMVC", "RegistracijaVozilaMVC\KonkursiZaPosaoMVC.csproj", "{E4D03DF3-EDB1-4281-92B7-3291F0D0FFB8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KadrovskiPodaci", "..\..\3_SlojServisa\WebServis\KadrovskiPodaci\KadrovskiPodaci\KadrovskiPodaci.csproj", "{0C5543AD-A906-41C7-BEFC-454BD49849A2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KonkursiZaPosaoMVC", "KonkursiZaPosaoMVC\KonkursiZaPosaoMVC.csproj", "{E4D03DF3-EDB1-4281-92B7-3291F0D0FFB8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,6 +13,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0C5543AD-A906-41C7-BEFC-454BD49849A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C5543AD-A906-41C7-BEFC-454BD49849A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C5543AD-A906-41C7-BEFC-454BD49849A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C5543AD-A906-41C7-BEFC-454BD49849A2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E4D03DF3-EDB1-4281-92B7-3291F0D0FFB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E4D03DF3-EDB1-4281-92B7-3291F0D0FFB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4D03DF3-EDB1-4281-92B7-3291F0D0FFB8}.Release|Any CPU.ActiveCfg = Release|Any CPU

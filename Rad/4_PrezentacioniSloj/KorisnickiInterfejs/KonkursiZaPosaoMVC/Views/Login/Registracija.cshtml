@@ -1,0 +1,146 @@
+@{
+ViewBag.Title = "Registracija";
+}
+
+<style>
+    .registration-wrapper {
+        max-width: 520px;
+        margin: 45px auto;
+    }
+
+    .registration-card {
+        padding: 35px;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.09);
+    }
+
+    .registration-title {
+        margin-bottom: 8px;
+        font-size: 30px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .registration-description {
+        margin-bottom: 28px;
+        color: #64748b;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 7px;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .registration-button {
+        width: 100%;
+        padding: 11px;
+        border: none;
+        border-radius: 9px;
+        background: #0f766e;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .registration-button:hover {
+        background: #115e59;
+    }
+
+    .login-link {
+        margin-top: 22px;
+        text-align: center;
+    }
+</style>
+
+<div class="registration-wrapper">
+    <div class="registration-card">
+
+
+    <h1 class="registration-title">
+        Kreiranje naloga
+    </h1>
+
+    <p class="registration-description">
+        Registrujte korisni&#269;ki nalog kako biste mogli da
+        podnesete prijavu na konkurs za posao.
+    </p>
+
+    @if (ViewBag.Greska != null)
+    {
+        <div class="alert alert-danger">
+            @ViewBag.Greska
+        </div>
+    }
+
+    <form method="post"
+          action="@Url.Action("Registracija", "Login")">
+
+        <div class="form-group">
+            <label class="form-label"
+                   for="korisnickoIme">
+                Korisni&#269;ko ime
+            </label>
+
+            <input type="text"
+                   id="korisnickoIme"
+                   name="korisnickoIme"
+                   class="form-control"
+                   value="@Request.Form["korisnickoIme"]"
+                   autocomplete="username"
+                   required />
+        </div>
+
+        <div class="form-group">
+            <label class="form-label"
+                   for="lozinka">
+                Lozinka
+            </label>
+
+            <input type="password"
+                   id="lozinka"
+                   name="lozinka"
+                   class="form-control"
+                   autocomplete="new-password"
+                   required />
+        </div>
+
+        <div class="form-group">
+            <label class="form-label"
+                   for="potvrdaLozinke">
+                Potvrda lozinke
+            </label>
+
+            <input type="password"
+                   id="potvrdaLozinke"
+                   name="potvrdaLozinke"
+                   class="form-control"
+                   autocomplete="new-password"
+                   required />
+        </div>
+
+        <button type="submit"
+                class="registration-button">
+            Registruj se
+        </button>
+    </form>
+
+    <div class="login-link">
+        Ve&#263; imate nalog?
+
+        <a href="@Url.Action("Index", "Login")">
+            Prijavite se
+        </a>
+    </div>
+
+</div>
+
+
+</div>

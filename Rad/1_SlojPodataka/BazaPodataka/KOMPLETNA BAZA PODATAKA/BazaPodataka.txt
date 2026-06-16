@@ -1,54 +1,271 @@
 ﻿IF DB_ID(N'KonkursiZaPosao') IS NULL
+BEGIN
     CREATE DATABASE KonkursiZaPosao;
+END;
 GO
+
 USE KonkursiZaPosao;
 GO
 
-IF OBJECT_ID('dbo.DokumentacijaPrijave','U') IS NOT NULL DROP TABLE dbo.DokumentacijaPrijave;
-IF OBJECT_ID('dbo.PrijavaKandidata','U') IS NOT NULL DROP TABLE dbo.PrijavaKandidata;
-IF OBJECT_ID('dbo.TipDokumenta','U') IS NOT NULL DROP TABLE dbo.TipDokumenta;
-IF OBJECT_ID('dbo.Korisnici','U') IS NOT NULL DROP TABLE dbo.Korisnici;
+/*
+    PAŽNJA:
+    Ova skripta ponovo kreira tabele i briše postojeće podatke.
+    Koristi je za početno postavljanje ili potpuno resetovanje baze.
+*/
+
+IF OBJECT_ID(N'dbo.DokumentacijaPrijave', N'U') IS NOT NULL
+BEGIN
+    DROP TABLE dbo.DokumentacijaPrijave;
+END;
 GO
 
-CREATE TABLE dbo.Korisnici(
- KorisnikID INT IDENTITY PRIMARY KEY,
- KorisnickoIme NVARCHAR(50) NOT NULL UNIQUE,
- Lozinka NVARCHAR(100) NOT NULL,
- Uloga NVARCHAR(20) NOT NULL
-);
+IF OBJECT_ID(N'dbo.PrijavaKandidata', N'U') IS NOT NULL
+BEGIN
+    DROP TABLE dbo.PrijavaKandidata;
+END;
+GO
 
-CREATE TABLE dbo.TipDokumenta(
- TipDokumentaID INT IDENTITY PRIMARY KEY,
- Naziv NVARCHAR(100) NOT NULL,
- Obavezan BIT NOT NULL
-);
+IF OBJECT_ID(N'dbo.TipDokumenta', N'U') IS NOT NULL
+BEGIN
+    DROP TABLE dbo.TipDokumenta;
+END;
+GO
 
-CREATE TABLE dbo.PrijavaKandidata(
- ZahtevID INT IDENTITY PRIMARY KEY,
- ImePrezime NVARCHAR(100) NOT NULL,
- Email NVARCHAR(100) NOT NULL,
- KontaktTelefon NVARCHAR(20) NOT NULL,
- NazivKonkursa NVARCHAR(150) NOT NULL,
- StepenObrazovanja NVARCHAR(80) NOT NULL,
- GodineIskustva INT NOT NULL,
- MotivacionoPismo NVARCHAR(MAX) NULL,
- DatumPodnosenja DATE NOT NULL,
- RokKonkursa DATE NOT NULL,
- StatusZahteva NVARCHAR(30) NOT NULL,
- IspunjavaOsnovneUslove BIT NOT NULL DEFAULT(0)
-);
+IF OBJECT_ID(N'dbo.Korisnici', N'U') IS NOT NULL
+BEGIN
+    DROP TABLE dbo.Korisnici;
+END;
+GO
 
-CREATE TABLE dbo.DokumentacijaPrijave(
- DokumentacijaID INT IDENTITY PRIMARY KEY,
- ZahtevID INT NOT NULL REFERENCES dbo.PrijavaKandidata(ZahtevID) ON DELETE CASCADE,
- TipDokumentaID INT NOT NULL REFERENCES dbo.TipDokumenta(TipDokumentaID),
- Dostavljen BIT NOT NULL,
- Napomena NVARCHAR(200) NULL
+/* =========================================================
+   TABELA: Korisnici
+   ========================================================= */
+
+CREATE TABLE dbo.Korisnici
+(
+    KorisnikID INT IDENTITY(1,1) NOT NULL
+        CONSTRAINT PK_Korisnici
+        PRIMARY KEY,
+
+    KorisnickoIme NVARCHAR(50) NOT NULL
+        CONSTRAINT UQ_Korisnici_KorisnickoIme
+        UNIQUE,
+
+    Lozinka NVARCHAR(100) NOT NULL,
+
+    Uloga NVARCHAR(20) NOT NULL
+        CONSTRAINT DF_Korisnici_Uloga
+        DEFAULT N'Korisnik',
+
+    CONSTRAINT CK_Korisnici_Uloga
+        CHECK
+        (
+            Uloga IN
+            (
+                N'Admin',
+                N'Korisnik'
+            )
+        )
 );
 GO
 
-INSERT dbo.Korisnici(KorisnickoIme,Lozinka,Uloga) VALUES
-(N'admin',N'admin',N'Administrator'),(N'hr',N'hr',N'HR');
-INSERT dbo.TipDokumenta(Naziv,Obavezan) VALUES
-(N'Biografija (CV)',1),(N'Motivaciono pismo',0),(N'Diploma ili potvrda o obrazovanju',1),(N'Preporuka prethodnog poslodavca',0);
+/* =========================================================
+   TABELA: TipDokumenta
+   ========================================================= */
+
+CREATE TABLE dbo.TipDokumenta
+(
+    TipDokumentaID INT IDENTITY(1,1) NOT NULL
+        CONSTRAINT PK_TipDokumenta
+        PRIMARY KEY,
+
+    Naziv NVARCHAR(100) NOT NULL
+        CONSTRAINT UQ_TipDokumenta_Naziv
+        UNIQUE,
+
+    Obavezan BIT NOT NULL
+        CONSTRAINT DF_TipDokumenta_Obavezan
+        DEFAULT 0
+);
+GO
+
+/* =========================================================
+   TABELA: PrijavaKandidata
+   ========================================================= */
+
+CREATE TABLE dbo.PrijavaKandidata
+(
+    ZahtevID INT IDENTITY(1,1) NOT NULL
+        CONSTRAINT PK_PrijavaKandidata
+        PRIMARY KEY,
+
+    KorisnikID INT NOT NULL,
+
+    ImePrezime NVARCHAR(100) NOT NULL,
+
+    Email NVARCHAR(100) NOT NULL,
+
+    KontaktTelefon NVARCHAR(20) NOT NULL,
+
+    PoslednjaSkola NVARCHAR(150) NOT NULL,
+
+    MestoSkole NVARCHAR(100) NULL,
+
+    Zanimanje NVARCHAR(150) NOT NULL,
+
+    StepenObrazovanja NVARCHAR(80) NOT NULL,
+
+    NazivKonkursa NVARCHAR(150) NOT NULL,
+
+    RadnoMesto NVARCHAR(150) NOT NULL,
+
+    GodineIskustva INT NOT NULL,
+
+    MotivacionoPismo NVARCHAR(MAX) NULL,
+
+    DatumPodnosenja DATE NOT NULL
+        CONSTRAINT DF_PrijavaKandidata_DatumPodnosenja
+        DEFAULT CONVERT(DATE, GETDATE()),
+
+    RokKonkursa DATE NOT NULL,
+
+    StatusZahteva NVARCHAR(30) NOT NULL
+        CONSTRAINT DF_PrijavaKandidata_Status
+        DEFAULT N'Primljena',
+
+    IspunjavaOsnovneUslove BIT NOT NULL
+        CONSTRAINT DF_PrijavaKandidata_IspunjavaUslove
+        DEFAULT 0,
+
+    CONSTRAINT FK_PrijavaKandidata_Korisnici
+        FOREIGN KEY (KorisnikID)
+        REFERENCES dbo.Korisnici(KorisnikID),
+
+    CONSTRAINT CK_PrijavaKandidata_GodineIskustva
+        CHECK
+        (
+            GodineIskustva BETWEEN 0 AND 50
+        ),
+
+    CONSTRAINT CK_PrijavaKandidata_Status
+        CHECK
+        (
+            StatusZahteva IN
+            (
+                N'Primljena',
+                N'U razmatranju',
+                N'Odbijena',
+                N'Izabran'
+            )
+        )
+);
+GO
+
+/* =========================================================
+   TABELA: DokumentacijaPrijave
+   ========================================================= */
+
+CREATE TABLE dbo.DokumentacijaPrijave
+(
+    DokumentacijaID INT IDENTITY(1,1) NOT NULL
+        CONSTRAINT PK_DokumentacijaPrijave
+        PRIMARY KEY,
+
+    ZahtevID INT NOT NULL,
+
+    TipDokumentaID INT NOT NULL,
+
+    Dostavljen BIT NOT NULL
+        CONSTRAINT DF_DokumentacijaPrijave_Dostavljen
+        DEFAULT 0,
+
+    Napomena NVARCHAR(200) NULL,
+
+    CONSTRAINT FK_DokumentacijaPrijave_Prijava
+        FOREIGN KEY (ZahtevID)
+        REFERENCES dbo.PrijavaKandidata(ZahtevID)
+        ON DELETE CASCADE,
+
+    CONSTRAINT FK_DokumentacijaPrijave_TipDokumenta
+        FOREIGN KEY (TipDokumentaID)
+        REFERENCES dbo.TipDokumenta(TipDokumentaID),
+
+    CONSTRAINT UQ_DokumentacijaPrijave_Zahtev_Tip
+        UNIQUE
+        (
+            ZahtevID,
+            TipDokumentaID
+        )
+);
+GO
+
+/* =========================================================
+   INDEKSI
+   ========================================================= */
+
+CREATE INDEX IX_PrijavaKandidata_KorisnikID
+ON dbo.PrijavaKandidata(KorisnikID);
+GO
+
+CREATE INDEX IX_PrijavaKandidata_DatumPodnosenja
+ON dbo.PrijavaKandidata(DatumPodnosenja DESC);
+GO
+
+CREATE INDEX IX_PrijavaKandidata_StatusZahteva
+ON dbo.PrijavaKandidata(StatusZahteva);
+GO
+
+CREATE INDEX IX_DokumentacijaPrijave_ZahtevID
+ON dbo.DokumentacijaPrijave(ZahtevID);
+GO
+
+/* =========================================================
+   POČETNI KORISNICI
+   ========================================================= */
+
+INSERT INTO dbo.Korisnici
+(
+    KorisnickoIme,
+    Lozinka,
+    Uloga
+)
+VALUES
+    (
+        N'admin',
+        N'admin',
+        N'Admin'
+    ),
+    (
+        N'korisnik',
+        N'korisnik',
+        N'Korisnik'
+    );
+GO
+
+/* =========================================================
+   TIPOVI DOKUMENATA
+   ========================================================= */
+
+INSERT INTO dbo.TipDokumenta
+(
+    Naziv,
+    Obavezan
+)
+VALUES
+    (
+        N'Biografija (CV)',
+        1
+    ),
+    (
+        N'Motivaciono pismo',
+        0
+    ),
+    (
+        N'Diploma ili potvrda o obrazovanju',
+        1
+    ),
+    (
+        N'Preporuka prethodnog poslodavca',
+        0
+    );
 GO
