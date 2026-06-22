@@ -13,6 +13,11 @@
             as System.Collections.Generic.IEnumerable<string>
         ?? new string[0];
 
+    var izabranaDokumenta =
+        ViewBag.IzabranaDokumenta
+            as System.Collections.Generic.IEnumerable<int>
+        ?? new int[0];
+
     string[] stepeniObrazovanja =
     {
         "Srednja škola",
@@ -27,33 +32,17 @@
             ? Model.RokKonkursa.ToString("yyyy-MM-dd")
             : string.Empty;
 
-    string[] izabranaDokumenta =
-        Request.Form.GetValues("Dokumenta")
-        ?? new string[0];
-
     bool cvIzabran =
-        Array.IndexOf(
-            izabranaDokumenta,
-            "1"
-        ) >= 0;
+        izabranaDokumenta.Contains(1);
 
     bool motivacionoPismoIzabrano =
-        Array.IndexOf(
-            izabranaDokumenta,
-            "2"
-        ) >= 0;
+        izabranaDokumenta.Contains(2);
 
     bool diplomaIzabrana =
-        Array.IndexOf(
-            izabranaDokumenta,
-            "3"
-        ) >= 0;
+        izabranaDokumenta.Contains(3);
 
     bool preporukaIzabrana =
-        Array.IndexOf(
-            izabranaDokumenta,
-            "4"
-        ) >= 0;
+        izabranaDokumenta.Contains(4);
 
     bool korisnikJeAdministrator =
         string.Equals(
@@ -87,7 +76,7 @@
         margin-bottom: 26px;
         padding: 38px;
         border-radius: 22px;
-        background: linear-gradient( 135deg, #0f172a 0%, #1e3a5f 60%, #0f766e 100% );
+        background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #0f766e 100%);
         color: #ffffff;
         box-shadow: 0 16px 38px rgba(15, 23, 42, 0.17);
     }
@@ -263,17 +252,6 @@
             color: #94a3b8;
         }
 
-        .kontrola-polja.polje-neispravno {
-            border-color: #dc2626 !important;
-            background: #fff7f7;
-            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
-        }
-
-        .kontrola-polja.polje-ispravno {
-            border-color: #16a34a;
-            background: #f7fff9;
-        }
-
     .field-validation-error,
     .text-danger {
         color: #dc2626;
@@ -307,18 +285,11 @@
         color: #475569;
         font-size: 16px;
         cursor: pointer;
-        transition: background 0.2s ease, color 0.2s ease;
     }
 
         .dugme-padajuce-liste:hover {
             background: #ecfdf5;
             color: #0f766e;
-        }
-
-        .dugme-padajuce-liste:focus {
-            outline: none;
-            border-color: #0f766e;
-            box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
         }
 
     .padajuca-lista-predloga {
@@ -646,7 +617,6 @@
                 </div>
 
                 <div>
-
                     <h2 class="naslov-odeljka">
                         Podaci o kandidatu
                     </h2>
@@ -654,7 +624,6 @@
                     <p class="opis-odeljka">
                         Lični, kontakt i obrazovni podaci kandidata.
                     </p>
-
                 </div>
 
             </div>
@@ -916,7 +885,6 @@
                 </div>
 
                 <div>
-
                     <h2 class="naslov-odeljka">
                         Podaci o konkursu
                     </h2>
@@ -925,7 +893,6 @@
                         Konkurs, radno mesto, iskustvo kandidata
                         i rok za prijavu.
                     </p>
-
                 </div>
 
             </div>
@@ -1110,8 +1077,7 @@
                              {
                                  @class = "kontrola-polja tekstualno-polje",
                                  id = "MotivacionoPismo",
-                                 maxlength = "5000",
-                                 placeholder = "Napišite zbog čega ste zainteresovani za ovu poziciju..."
+                                 placeholder = "Unesite dodatno obrazloženje, motivaciju kandidata ili napomenu."
                              }
                          )
 
@@ -1123,11 +1089,6 @@
                                  @class = "text-danger"
                              }
                          )
-
-                    <p class="pomocni-tekst">
-                        Ukratko opišite motivaciju, iskustvo
-                        i razloge za prijavu.
-                    </p>
 
                 </div>
 
@@ -1144,22 +1105,22 @@
                 </div>
 
                 <div>
-
                     <h2 class="naslov-odeljka">
-                        Dokumentacija
+                        Dokumentacija prijave
                     </h2>
 
                     <p class="opis-odeljka">
-                        Označite dokumente koje kandidat dostavlja.
+                        Izaberite dokumenta koja kandidat dostavlja uz prijavu.
+                        CV i diploma su obavezni.
                     </p>
-
                 </div>
 
             </div>
 
             <div class="mreza-dokumenata">
 
-                <label class="stavka-dokumenta">
+                <label class="stavka-dokumenta"
+                       for="Dokument1">
 
                     <input type="checkbox"
                            id="Dokument1"
@@ -1171,22 +1132,24 @@
                     <span class="podaci-dokumenta">
 
                         <span class="naziv-dokumenta">
-                            Biografija (CV)
+                            Biografija kandidata / CV
                         </span>
 
                         <span class="opis-dokumenta">
-                            Pregled obrazovanja, iskustva i veština kandidata.
+                            Osnovni dokument sa radnim iskustvom,
+                            obrazovanjem i kontakt podacima kandidata.
                         </span>
 
                         <span class="oznaka-obavezno">
-                            Evidentira se
+                            Obavezno
                         </span>
 
                     </span>
 
                 </label>
 
-                <label class="stavka-dokumenta">
+                <label class="stavka-dokumenta"
+                       for="Dokument2">
 
                     <input type="checkbox"
                            id="Dokument2"
@@ -1202,7 +1165,8 @@
                         </span>
 
                         <span class="opis-dokumenta">
-                            Dodatno obrazloženje interesa za radno mesto.
+                            Dodatno obrazloženje zbog čega kandidat
+                            želi da konkuriše za izabrano radno mesto.
                         </span>
 
                         <span class="oznaka-opciono">
@@ -1213,7 +1177,8 @@
 
                 </label>
 
-                <label class="stavka-dokumenta">
+                <label class="stavka-dokumenta"
+                       for="Dokument3">
 
                     <input type="checkbox"
                            id="Dokument3"
@@ -1229,18 +1194,20 @@
                         </span>
 
                         <span class="opis-dokumenta">
-                            Dokaz o završenom stepenu obrazovanja.
+                            Dokument kojim se potvrđuje stepen obrazovanja
+                            i stečeno zanimanje kandidata.
                         </span>
 
                         <span class="oznaka-obavezno">
-                            Evidentira se
+                            Obavezno
                         </span>
 
                     </span>
 
                 </label>
 
-                <label class="stavka-dokumenta">
+                <label class="stavka-dokumenta"
+                       for="Dokument4">
 
                     <input type="checkbox"
                            id="Dokument4"
@@ -1256,7 +1223,8 @@
                         </span>
 
                         <span class="opis-dokumenta">
-                            Preporuka koja potvrđuje prethodno iskustvo.
+                            Preporuka koja potvrđuje prethodno iskustvo
+                            i kvalitet rada kandidata.
                         </span>
 
                         <span class="oznaka-opciono">
@@ -1266,6 +1234,21 @@
                     </span>
 
                 </label>
+
+            </div>
+
+            <div class="napomena-poslovnog-pravila">
+
+                <div class="oznaka-informacije">
+                    i
+                </div>
+
+                <p class="tekst-informacije">
+                    Ovaj deo predstavlja detail deo master-detail unosa.
+                    Glavna prijava kandidata je master zapis, a izabrana
+                    dokumenta su povezani detail zapisi. Prijava i dokumentacija
+                    se čuvaju zajedno kroz transakciju.
+                </p>
 
             </div>
 

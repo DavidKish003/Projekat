@@ -14,7 +14,7 @@ namespace KonkursiZaPosaoMVC.Controllers
 {
     public class ZahtevController : Controller
     {
-        private readonly string connectionString =
+        private readonly string stringKonekcije =
             @"Data Source=.;Initial Catalog=KonkursiZaPosao;Integrated Security=True";
 
         private readonly string putanjaDoOgranicenja =
@@ -53,7 +53,8 @@ namespace KonkursiZaPosaoMVC.Controllers
                 );
         }
 
-        public ActionResult Index(
+        [ActionName("Index")]
+        public ActionResult PrikaziSvePrijave(
             string pretraga,
             string status)
         {
@@ -73,22 +74,22 @@ namespace KonkursiZaPosaoMVC.Controllers
                 );
             }
 
-            SPZahtevZaRegistracijuDBKlasa db =
+            SPZahtevZaRegistracijuDBKlasa bazaPodataka =
                 new SPZahtevZaRegistracijuDBKlasa(
-                    connectionString
+                    stringKonekcije
                 );
 
-            DataSet dataSet;
+            DataSet skupPodataka;
 
             if (string.IsNullOrWhiteSpace(pretraga))
             {
-                dataSet =
-                    db.DajSveZahteveZaRegistraciju();
+                skupPodataka =
+                    bazaPodataka.DajSveZahteveZaRegistraciju();
             }
             else
             {
-                dataSet =
-                    db.DajZahteveZaRegistracijuSaFilterom(
+                skupPodataka =
+                    bazaPodataka.DajZahteveZaRegistracijuSaFilterom(
                         pretraga
                     );
             }
@@ -99,7 +100,7 @@ namespace KonkursiZaPosaoMVC.Controllers
             ViewBag.Status =
                 status;
 
-            if (dataSet.Tables.Count == 0)
+            if (skupPodataka.Tables.Count == 0)
             {
                 return View(
                     new DataTable()
@@ -107,7 +108,7 @@ namespace KonkursiZaPosaoMVC.Controllers
             }
 
             DataTable tabela =
-                dataSet.Tables[0];
+                skupPodataka.Tables[0];
 
             if (!string.IsNullOrWhiteSpace(status))
             {
@@ -133,7 +134,8 @@ namespace KonkursiZaPosaoMVC.Controllers
         }
 
         [HttpGet]
-        public ActionResult MojePrijave()
+        [ActionName("MojePrijave")]
+        public ActionResult PrikaziMojePrijave()
         {
             if (!KorisnikJePrijavljen())
             {
@@ -156,17 +158,17 @@ namespace KonkursiZaPosaoMVC.Controllers
                     Session["KorisnikID"]
                 );
 
-            SPZahtevZaRegistracijuDBKlasa db =
+            SPZahtevZaRegistracijuDBKlasa bazaPodataka =
                 new SPZahtevZaRegistracijuDBKlasa(
-                    connectionString
+                    stringKonekcije
                 );
 
-            DataSet dataSet =
-                db.DajPrijaveKorisnika(
+            DataSet skupPodataka =
+                bazaPodataka.DajPrijaveKorisnika(
                     korisnikId
                 );
 
-            if (dataSet.Tables.Count == 0)
+            if (skupPodataka.Tables.Count == 0)
             {
                 return View(
                     new DataTable()
@@ -174,12 +176,13 @@ namespace KonkursiZaPosaoMVC.Controllers
             }
 
             return View(
-                dataSet.Tables[0]
+                skupPodataka.Tables[0]
             );
         }
 
         [HttpGet]
-        public ActionResult Detalji(int id)
+        [ActionName("Detalji")]
+        public ActionResult PrikaziDetaljePrijave(int id)
         {
             if (!KorisnikJePrijavljen())
             {
@@ -189,24 +192,24 @@ namespace KonkursiZaPosaoMVC.Controllers
                 );
             }
 
-            SPZahtevZaRegistracijuDBKlasa db =
+            SPZahtevZaRegistracijuDBKlasa bazaPodataka =
                 new SPZahtevZaRegistracijuDBKlasa(
-                    connectionString
+                    stringKonekcije
                 );
 
-            DataSet dataSet =
-                db.DajZahtevZaRegistracijuSaDokumentacijom(
+            DataSet skupPodataka =
+                bazaPodataka.DajZahtevZaRegistracijuSaDokumentacijom(
                     id
                 );
 
-            if (dataSet.Tables.Count == 0 ||
-                dataSet.Tables[0].Rows.Count == 0)
+            if (skupPodataka.Tables.Count == 0 ||
+                skupPodataka.Tables[0].Rows.Count == 0)
             {
                 return HttpNotFound();
             }
 
             DataTable tabela =
-                dataSet.Tables[0];
+                skupPodataka.Tables[0];
 
             DataRow redZahteva =
                 tabela.Rows[0];
@@ -241,8 +244,8 @@ namespace KonkursiZaPosaoMVC.Controllers
                 }
             }
 
-            ZahtevViewModel viewModel =
-                KreirajZahtevViewModel(
+            ZahtevViewModel modelZaPrikaz =
+                KreirajModelZaPrikazZahteva(
                     redZahteva
                 );
 
@@ -289,16 +292,17 @@ namespace KonkursiZaPosaoMVC.Controllers
                                 )
                     };
 
-                viewModel.Dokumentacija.Add(
+                modelZaPrikaz.Dokumentacija.Add(
                     dokument
                 );
             }
 
-            return View(viewModel);
+            return View(modelZaPrikaz);
         }
 
         [HttpGet]
-        public ActionResult Dodaj()
+        [ActionName("Dodaj")]
+        public ActionResult PrikaziFormuZaDodavanje()
         {
             if (!KorisnikJePrijavljen())
             {
@@ -310,11 +314,17 @@ namespace KonkursiZaPosaoMVC.Controllers
 
             PopuniListeIzXml();
 
+            ViewBag.IzabranaDokumenta =
+                new List<int>();
+
             ZahtevZaRegistracijuKlasa zahtev =
                 new ZahtevZaRegistracijuKlasa
                 {
                     DatumPodnosenja =
                         DateTime.Today,
+
+                    RokKonkursa =
+                        DateTime.Today.AddDays(7),
 
                     GodineIskustva =
                         0
@@ -325,7 +335,8 @@ namespace KonkursiZaPosaoMVC.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Dodaj(
+        [ActionName("Dodaj")]
+        public ActionResult SacuvajNovuPrijavu(
             ZahtevZaRegistracijuKlasa zahtev,
             int[] Dokumenta)
         {
@@ -339,15 +350,40 @@ namespace KonkursiZaPosaoMVC.Controllers
 
             PopuniListeIzXml();
 
+            if (zahtev == null)
+            {
+                zahtev =
+                    new ZahtevZaRegistracijuKlasa();
+            }
+
             zahtev.KorisnikID =
                 Convert.ToInt32(
                     Session["KorisnikID"]
                 );
 
-            ViewBag.IzabranaDokumenta =
+            List<int> dokumenta =
                 PretvoriDokumentaUListu(
                     Dokumenta
                 );
+
+            ViewBag.IzabranaDokumenta =
+                dokumenta;
+
+            if (!dokumenta.Contains(1))
+            {
+                ModelState.AddModelError(
+                    "",
+                    "Biografija (CV) mora biti označena kao dostavljena dokumentacija."
+                );
+            }
+
+            if (!dokumenta.Contains(3))
+            {
+                ModelState.AddModelError(
+                    "",
+                    "Diploma mora biti označena kao dostavljena dokumentacija."
+                );
+            }
 
             if (!ModelState.IsValid)
             {
@@ -356,11 +392,6 @@ namespace KonkursiZaPosaoMVC.Controllers
 
             try
             {
-                List<int> dokumenta =
-                    PretvoriDokumentaUListu(
-                        Dokumenta
-                    );
-
                 PoslovnaLogika.ZahtevPoslovnaLogika poslovnaLogika =
                     new PoslovnaLogika.ZahtevPoslovnaLogika();
 
@@ -383,18 +414,18 @@ namespace KonkursiZaPosaoMVC.Controllers
                         zahtev.RadnoMesto
                     );
 
-                SPZahtevZaRegistracijuDBKlasa db =
+                SPZahtevZaRegistracijuDBKlasa bazaPodataka =
                     new SPZahtevZaRegistracijuDBKlasa(
-                        connectionString
+                        stringKonekcije
                     );
 
-                db.SnimiNoviZahtevSaDokumentacijom(
+                bazaPodataka.SnimiNoviZahtevSaDokumentacijom(
                     zahtev,
                     dokumenta
                 );
 
                 TempData["Poruka"] =
-                    "Prijava je uspešno podneta.";
+                    "Prijava kandidata i dokumentacija su uspešno sačuvani.";
 
                 if (KorisnikJeAdministrator())
                 {
@@ -418,7 +449,7 @@ namespace KonkursiZaPosaoMVC.Controllers
 
                 ModelState.AddModelError(
                     "",
-                    "Greška prilikom čuvanja prijave: " +
+                    "Greška prilikom čuvanja prijave i dokumentacije: " +
                     detaljnaGreska
                 );
 
@@ -427,7 +458,8 @@ namespace KonkursiZaPosaoMVC.Controllers
         }
 
         [HttpGet]
-        public ActionResult Izmeni(int id)
+        [ActionName("Izmeni")]
+        public ActionResult PrikaziFormuZaIzmenu(int id)
         {
             if (!KorisnikJePrijavljen())
             {
@@ -447,24 +479,24 @@ namespace KonkursiZaPosaoMVC.Controllers
 
             PopuniListeIzXml();
 
-            SPZahtevZaRegistracijuDBKlasa db =
+            SPZahtevZaRegistracijuDBKlasa bazaPodataka =
                 new SPZahtevZaRegistracijuDBKlasa(
-                    connectionString
+                    stringKonekcije
                 );
 
-            DataSet dataSet =
-                db.DajZahtevZaRegistracijuSaDokumentacijom(
+            DataSet skupPodataka =
+                bazaPodataka.DajZahtevZaRegistracijuSaDokumentacijom(
                     id
                 );
 
-            if (dataSet.Tables.Count == 0 ||
-                dataSet.Tables[0].Rows.Count == 0)
+            if (skupPodataka.Tables.Count == 0 ||
+                skupPodataka.Tables[0].Rows.Count == 0)
             {
                 return HttpNotFound();
             }
 
             DataTable tabela =
-                dataSet.Tables[0];
+                skupPodataka.Tables[0];
 
             DataRow redZahteva =
                 tabela.Rows[0];
@@ -484,7 +516,8 @@ namespace KonkursiZaPosaoMVC.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Izmeni(
+        [ActionName("Izmeni")]
+        public ActionResult SacuvajIzmenuPrijave(
             ZahtevZaRegistracijuKlasa zahtev,
             int[] Dokumenta)
         {
@@ -514,6 +547,22 @@ namespace KonkursiZaPosaoMVC.Controllers
             ViewBag.IzabranaDokumenta =
                 dokumenta;
 
+            if (!dokumenta.Contains(1))
+            {
+                ModelState.AddModelError(
+                    "",
+                    "Biografija (CV) mora biti označena kao dostavljena dokumentacija."
+                );
+            }
+
+            if (!dokumenta.Contains(3))
+            {
+                ModelState.AddModelError(
+                    "",
+                    "Diploma mora biti označena kao dostavljena dokumentacija."
+                );
+            }
+
             if (!ModelState.IsValid)
             {
                 return View(zahtev);
@@ -540,18 +589,18 @@ namespace KonkursiZaPosaoMVC.Controllers
                         zahtev.RadnoMesto
                     );
 
-                SPZahtevZaRegistracijuDBKlasa db =
+                SPZahtevZaRegistracijuDBKlasa bazaPodataka =
                     new SPZahtevZaRegistracijuDBKlasa(
-                        connectionString
+                        stringKonekcije
                     );
 
-                db.IzmeniZahtevSaDokumentacijom(
+                bazaPodataka.IzmeniZahtevSaDokumentacijom(
                     zahtev,
                     dokumenta
                 );
 
                 TempData["Poruka"] =
-                    "Prijava je uspešno izmenjena.";
+                    "Prijava kandidata i dokumentacija su uspešno izmenjeni.";
 
                 return RedirectToAction(
                     "Index"
@@ -566,7 +615,7 @@ namespace KonkursiZaPosaoMVC.Controllers
 
                 ModelState.AddModelError(
                     "",
-                    "Greška prilikom izmene prijave: " +
+                    "Greška prilikom izmene prijave i dokumentacije: " +
                     detaljnaGreska
                 );
 
@@ -575,7 +624,8 @@ namespace KonkursiZaPosaoMVC.Controllers
         }
 
         [HttpPost]
-        public ActionResult Obrisi(int id)
+        [ActionName("Obrisi")]
+        public ActionResult ObrisiPrijavu(int id)
         {
             if (!KorisnikJePrijavljen())
             {
@@ -593,14 +643,17 @@ namespace KonkursiZaPosaoMVC.Controllers
                 );
             }
 
-            SPZahtevZaRegistracijuDBKlasa db =
+            SPZahtevZaRegistracijuDBKlasa bazaPodataka =
                 new SPZahtevZaRegistracijuDBKlasa(
-                    connectionString
+                    stringKonekcije
                 );
 
-            db.ObrisiZahtevZaRegistraciju(
+            bazaPodataka.ObrisiZahtevZaRegistraciju(
                 id
             );
+
+            TempData["Poruka"] =
+                "Prijava je uspešno obrisana.";
 
             return RedirectToAction(
                 "Index"
@@ -608,7 +661,8 @@ namespace KonkursiZaPosaoMVC.Controllers
         }
 
         [HttpPost]
-        public ActionResult Prihvati(int id)
+        [ActionName("Prihvati")]
+        public ActionResult PrihvatiKandidata(int id)
         {
             if (!KorisnikJePrijavljen())
             {
@@ -631,13 +685,17 @@ namespace KonkursiZaPosaoMVC.Controllers
                 "Izabran"
             );
 
+            TempData["Poruka"] =
+                "Kandidat je uspešno izabran.";
+
             return RedirectToAction(
                 "Index"
             );
         }
 
         [HttpPost]
-        public ActionResult Odbij(int id)
+        [ActionName("Odbij")]
+        public ActionResult OdbijKandidata(int id)
         {
             if (!KorisnikJePrijavljen())
             {
@@ -659,6 +717,9 @@ namespace KonkursiZaPosaoMVC.Controllers
                 id,
                 "Odbijena"
             );
+
+            TempData["Poruka"] =
+                "Prijava je uspešno odbijena.";
 
             return RedirectToAction(
                 "Index"
@@ -814,12 +875,12 @@ namespace KonkursiZaPosaoMVC.Controllers
             int zahtevId,
             string noviStatus)
         {
-            SPZahtevZaRegistracijuDBKlasa db =
+            SPZahtevZaRegistracijuDBKlasa bazaPodataka =
                 new SPZahtevZaRegistracijuDBKlasa(
-                    connectionString
+                    stringKonekcije
                 );
 
-            db.PromeniStatusZahteva(
+            bazaPodataka.PromeniStatusZahteva(
                 zahtevId,
                 noviStatus
             );
@@ -895,198 +956,262 @@ namespace KonkursiZaPosaoMVC.Controllers
                 new ZahtevZaRegistracijuKlasa
                 {
                     ZahtevID =
-                        Convert.ToInt32(
-                            red["ZahtevID"]
+                        ProcitajInt(
+                            red,
+                            "ZahtevID"
+                        ),
+
+                    KorisnikID =
+                        ProcitajInt(
+                            red,
+                            "KorisnikID"
                         ),
 
                     ImePrezime =
-                        Convert.ToString(
-                            red["ImePrezime"]
+                        ProcitajString(
+                            red,
+                            "ImePrezime"
                         ),
 
                     Email =
-                        Convert.ToString(
-                            red["Email"]
+                        ProcitajString(
+                            red,
+                            "Email"
                         ),
 
                     KontaktTelefon =
-                        Convert.ToString(
-                            red["KontaktTelefon"]
+                        ProcitajString(
+                            red,
+                            "KontaktTelefon"
                         ),
 
                     PoslednjaSkola =
-                        Convert.ToString(
-                            red["PoslednjaSkola"]
+                        ProcitajString(
+                            red,
+                            "PoslednjaSkola"
                         ),
 
                     MestoSkole =
-                        Convert.ToString(
-                            red["MestoSkole"]
+                        ProcitajString(
+                            red,
+                            "MestoSkole"
                         ),
 
                     Zanimanje =
-                        Convert.ToString(
-                            red["Zanimanje"]
+                        ProcitajString(
+                            red,
+                            "Zanimanje"
                         ),
 
                     StepenObrazovanja =
-                        Convert.ToString(
-                            red["StepenObrazovanja"]
+                        ProcitajString(
+                            red,
+                            "StepenObrazovanja"
                         ),
 
                     NazivKonkursa =
-                        Convert.ToString(
-                            red["NazivKonkursa"]
+                        ProcitajString(
+                            red,
+                            "NazivKonkursa"
                         ),
 
                     RadnoMesto =
-                        Convert.ToString(
-                            red["RadnoMesto"]
+                        ProcitajString(
+                            red,
+                            "RadnoMesto"
                         ),
 
                     GodineIskustva =
-                        red["GodineIskustva"] == DBNull.Value
-                            ? 0
-                            : Convert.ToInt32(
-                                red["GodineIskustva"]
-                            ),
+                        ProcitajInt(
+                            red,
+                            "GodineIskustva"
+                        ),
 
                     MotivacionoPismo =
-                        red["MotivacionoPismo"] == DBNull.Value
-                            ? string.Empty
-                            : Convert.ToString(
-                                red["MotivacionoPismo"]
-                            ),
+                        ProcitajString(
+                            red,
+                            "MotivacionoPismo"
+                        ),
 
                     DatumPodnosenja =
-                        Convert.ToDateTime(
-                            red["DatumPodnosenja"]
+                        ProcitajDatum(
+                            red,
+                            "DatumPodnosenja"
                         ),
 
                     RokKonkursa =
-                        Convert.ToDateTime(
-                            red["RokKonkursa"]
+                        ProcitajDatum(
+                            red,
+                            "RokKonkursa"
                         ),
 
                     StatusZahteva =
-                        Convert.ToString(
-                            red["StatusZahteva"]
+                        ProcitajString(
+                            red,
+                            "StatusZahteva"
                         ),
 
                     IspunjavaOsnovneUslove =
-                        red["IspunjavaOsnovneUslove"] != DBNull.Value
-                        &&
-                        Convert.ToBoolean(
-                            red["IspunjavaOsnovneUslove"]
+                        ProcitajBool(
+                            red,
+                            "IspunjavaOsnovneUslove"
                         )
                 };
-
-            if (red.Table.Columns.Contains("KorisnikID") &&
-                red["KorisnikID"] != DBNull.Value)
-            {
-                zahtev.KorisnikID =
-                    Convert.ToInt32(
-                        red["KorisnikID"]
-                    );
-            }
 
             return zahtev;
         }
 
-        private ZahtevViewModel KreirajZahtevViewModel(
+        private ZahtevViewModel KreirajModelZaPrikazZahteva(
             DataRow red)
         {
-            return new ZahtevViewModel
+            ZahtevViewModel modelZaPrikaz =
+                new ZahtevViewModel
+                {
+                    ZahtevID =
+                        ProcitajInt(
+                            red,
+                            "ZahtevID"
+                        ),
+
+                    ImePrezime =
+                        ProcitajString(
+                            red,
+                            "ImePrezime"
+                        ),
+
+                    Email =
+                        ProcitajString(
+                            red,
+                            "Email"
+                        ),
+
+                    KontaktTelefon =
+                        ProcitajString(
+                            red,
+                            "KontaktTelefon"
+                        ),
+
+                    NazivKonkursa =
+                        ProcitajString(
+                            red,
+                            "NazivKonkursa"
+                        ),
+
+                    StepenObrazovanja =
+                        ProcitajString(
+                            red,
+                            "StepenObrazovanja"
+                        ),
+
+                    GodineIskustva =
+                        ProcitajInt(
+                            red,
+                            "GodineIskustva"
+                        ),
+
+                    MotivacionoPismo =
+                        ProcitajString(
+                            red,
+                            "MotivacionoPismo"
+                        ),
+
+                    DatumPodnosenja =
+                        ProcitajDatum(
+                            red,
+                            "DatumPodnosenja"
+                        ),
+
+                    RokKonkursa =
+                        ProcitajDatum(
+                            red,
+                            "RokKonkursa"
+                        ),
+
+                    StatusZahteva =
+                        ProcitajString(
+                            red,
+                            "StatusZahteva"
+                        ),
+
+                    IspunjavaOsnovneUslove =
+                        ProcitajBool(
+                            red,
+                            "IspunjavaOsnovneUslove"
+                        ),
+
+                    Dokumentacija =
+                        new List<DokumentacijaViewModel>()
+                };
+
+            return modelZaPrikaz;
+        }
+
+        private string ProcitajString(
+            DataRow red,
+            string nazivKolone)
+        {
+            if (red == null ||
+                red.Table == null ||
+                !red.Table.Columns.Contains(nazivKolone) ||
+                red[nazivKolone] == DBNull.Value)
             {
-                ZahtevID =
-                    Convert.ToInt32(
-                        red["ZahtevID"]
-                    ),
+                return string.Empty;
+            }
 
-                ImePrezime =
-                    Convert.ToString(
-                        red["ImePrezime"]
-                    ),
+            return Convert.ToString(
+                red[nazivKolone]
+            );
+        }
 
-                Email =
-                    Convert.ToString(
-                        red["Email"]
-                    ),
+        private int ProcitajInt(
+            DataRow red,
+            string nazivKolone)
+        {
+            if (red == null ||
+                red.Table == null ||
+                !red.Table.Columns.Contains(nazivKolone) ||
+                red[nazivKolone] == DBNull.Value)
+            {
+                return 0;
+            }
 
-                KontaktTelefon =
-                    Convert.ToString(
-                        red["KontaktTelefon"]
-                    ),
+            return Convert.ToInt32(
+                red[nazivKolone]
+            );
+        }
 
-                PoslednjaSkola =
-                    Convert.ToString(
-                        red["PoslednjaSkola"]
-                    ),
+        private DateTime ProcitajDatum(
+            DataRow red,
+            string nazivKolone)
+        {
+            if (red == null ||
+                red.Table == null ||
+                !red.Table.Columns.Contains(nazivKolone) ||
+                red[nazivKolone] == DBNull.Value)
+            {
+                return DateTime.MinValue;
+            }
 
-                MestoSkole =
-                    Convert.ToString(
-                        red["MestoSkole"]
-                    ),
+            return Convert.ToDateTime(
+                red[nazivKolone]
+            );
+        }
 
-                Zanimanje =
-                    Convert.ToString(
-                        red["Zanimanje"]
-                    ),
+        private bool ProcitajBool(
+            DataRow red,
+            string nazivKolone)
+        {
+            if (red == null ||
+                red.Table == null ||
+                !red.Table.Columns.Contains(nazivKolone) ||
+                red[nazivKolone] == DBNull.Value)
+            {
+                return false;
+            }
 
-                NazivKonkursa =
-                    Convert.ToString(
-                        red["NazivKonkursa"]
-                    ),
-
-                RadnoMesto =
-                    Convert.ToString(
-                        red["RadnoMesto"]
-                    ),
-
-                StepenObrazovanja =
-                    Convert.ToString(
-                        red["StepenObrazovanja"]
-                    ),
-
-                GodineIskustva =
-                    red["GodineIskustva"] == DBNull.Value
-                        ? 0
-                        : Convert.ToInt32(
-                            red["GodineIskustva"]
-                        ),
-
-                MotivacionoPismo =
-                    red["MotivacionoPismo"] == DBNull.Value
-                        ? string.Empty
-                        : Convert.ToString(
-                            red["MotivacionoPismo"]
-                        ),
-
-                DatumPodnosenja =
-                    Convert.ToDateTime(
-                        red["DatumPodnosenja"]
-                    ),
-
-                RokKonkursa =
-                    Convert.ToDateTime(
-                        red["RokKonkursa"]
-                    ),
-
-                StatusZahteva =
-                    Convert.ToString(
-                        red["StatusZahteva"]
-                    ),
-
-                IspunjavaOsnovneUslove =
-                    red["IspunjavaOsnovneUslove"] != DBNull.Value
-                    &&
-                    Convert.ToBoolean(
-                        red["IspunjavaOsnovneUslove"]
-                    ),
-
-                Dokumentacija =
-                    new List<DokumentacijaViewModel>()
-            };
+            return Convert.ToBoolean(
+                red[nazivKolone]
+            );
         }
     }
 }

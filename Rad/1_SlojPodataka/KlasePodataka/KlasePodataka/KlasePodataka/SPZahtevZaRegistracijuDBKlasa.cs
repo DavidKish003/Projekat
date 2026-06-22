@@ -7,22 +7,22 @@ namespace KlasePodataka
 {
     public class SPZahtevZaRegistracijuDBKlasa
     {
-        private readonly string connectionString;
+        private readonly string stringKonekcije;
 
         public SPZahtevZaRegistracijuDBKlasa(
-            string connectionString)
+            string stringKonekcije)
         {
-            this.connectionString = connectionString;
+            this.stringKonekcije = stringKonekcije;
         }
 
         private DataSet IzvrsiSelectProceduru(
             string nazivProcedure,
             params SqlParameter[] parametri)
         {
-            DataSet dataSet = new DataSet();
+            DataSet podaciSet = new DataSet();
 
             using (SqlConnection konekcija =
-                   new SqlConnection(connectionString))
+                   new SqlConnection(stringKonekcije))
             using (SqlCommand komanda =
                    new SqlCommand(nazivProcedure, konekcija))
             {
@@ -38,11 +38,11 @@ namespace KlasePodataka
                 using (SqlDataAdapter adapter =
                        new SqlDataAdapter(komanda))
                 {
-                    adapter.Fill(dataSet);
+                    adapter.Fill(podaciSet);
                 }
             }
 
-            return dataSet;
+            return podaciSet;
         }
 
         public DataSet DajSveZahteveZaRegistraciju()

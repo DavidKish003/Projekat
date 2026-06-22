@@ -23,10 +23,10 @@ namespace KlasePodataka
             string unesenoKorisnickoIme =
                 korisnickoIme.Trim();
 
-            using (KonkursiZaPosaoContext db =
+            using (KonkursiZaPosaoContext bzpdtk =
                    new KonkursiZaPosaoContext())
             {
-                return db.Korisnici
+                return bzpdtk.Korisnici
                     .AsNoTracking()
                     .FirstOrDefault(
                         korisnik =>
@@ -52,10 +52,10 @@ namespace KlasePodataka
             string unesenoKorisnickoIme =
                 korisnickoIme.Trim();
 
-            using (KonkursiZaPosaoContext db =
+            using (KonkursiZaPosaoContext bzpdtk =
                    new KonkursiZaPosaoContext())
             {
-                return db.Korisnici
+                return bzpdtk.Korisnici
                     .AsNoTracking()
                     .FirstOrDefault(
                         korisnik =>
@@ -75,14 +75,14 @@ namespace KlasePodataka
                 );
             }
 
-            using (KonkursiZaPosaoContext db =
+            using (KonkursiZaPosaoContext bzpdtk =
                    new KonkursiZaPosaoContext())
             {
-                db.Korisnici.Add(
+                bzpdtk.Korisnici.Add(
                     korisnik
                 );
 
-                return db.SaveChanges() > 0;
+                return bzpdtk.SaveChanges() > 0;
             }
         }
     }

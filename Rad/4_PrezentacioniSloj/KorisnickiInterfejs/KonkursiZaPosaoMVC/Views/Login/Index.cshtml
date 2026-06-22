@@ -1,14 +1,14 @@
 ﻿@{
-ViewBag.Title = "Prijava";
+    ViewBag.Title = "Prijava";
 }
 
 <style>
-    .login-wrapper {
+    .prijava-omotac {
         max-width: 500px;
         margin: 60px auto;
     }
 
-    .login-card {
+    .prijava-kartica {
         overflow: hidden;
         border: 1px solid #e2e8f0;
         border-radius: 18px;
@@ -16,40 +16,40 @@ ViewBag.Title = "Prijava";
         box-shadow: 0 14px 40px rgba(15, 23, 42, 0.1);
     }
 
-    .login-header {
+    .prijava-zaglavlje {
         padding: 30px;
         background: linear-gradient(135deg, #0f172a, #1e3a5f);
         color: #ffffff;
         text-align: center;
     }
 
-        .login-header h1 {
+        .prijava-zaglavlje h1 {
             margin: 0 0 8px;
             font-size: 30px;
             font-weight: 700;
         }
 
-        .login-header p {
+        .prijava-zaglavlje p {
             margin: 0;
             color: rgba(255, 255, 255, 0.8);
         }
 
-    .login-body {
+    .prijava-telo {
         padding: 35px;
     }
 
-    .form-group {
+    .grupa-polja {
         margin-bottom: 20px;
     }
 
-    .form-label {
+    .oznaka-polja {
         display: block;
         margin-bottom: 7px;
         color: #334155;
         font-weight: 600;
     }
 
-    .login-button {
+    .prijava-dugme {
         width: 100%;
         padding: 12px;
         border: none;
@@ -61,62 +61,61 @@ ViewBag.Title = "Prijava";
         cursor: pointer;
     }
 
-        .login-button:hover {
+        .prijava-dugme:hover {
             background: #115e59;
         }
 
-    .login-links {
+    .prijava-linkovi {
         margin-top: 22px;
         text-align: center;
         color: #64748b;
     }
 
-        .login-links a {
+        .prijava-linkovi a {
             font-weight: 600;
         }
 
-    .home-link {
+    .pocetna-link {
         display: block;
         margin-top: 12px;
     }
 </style>
 
-<div class="login-wrapper">
-
+<div class="prijava-omotac">
 
     @if (TempData["Poruka"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["Poruka"]
-    </div>
-}
+    {
+        <div class="alert alert-success">
+            @TempData["Poruka"]
+        </div>
+    }
 
-    <div class="login-card">
+    <div class="prijava-kartica">
 
-        <div class="login-header">
+        <div class="prijava-zaglavlje">
             <h1>Prijava na sistem</h1>
 
             <p>
-                Unesite podatke svog korisni&#269;kog naloga.
+                Unesite podatke svog korisničkog naloga.
             </p>
         </div>
 
-        <div class="login-body">
+        <div class="prijava-telo">
 
             @if (ViewBag.Greska != null)
-        {
-            <div class="alert alert-danger">
-                @ViewBag.Greska
-            </div>
-        }
+            {
+                <div class="alert alert-danger">
+                    @ViewBag.Greska
+                </div>
+            }
 
             <form method="post"
                   action="@Url.Action("Index", "Login")">
 
-                <div class="form-group">
-                    <label class="form-label"
+                <div class="grupa-polja">
+                    <label class="oznaka-polja"
                            for="korisnickoIme">
-                        Korisni&#269;ko ime
+                        Korisničko ime
                     </label>
 
                     <input type="text"
@@ -124,13 +123,13 @@ ViewBag.Title = "Prijava";
                            name="korisnickoIme"
                            class="form-control"
                            value="@Request.Form["korisnickoIme"]"
-                           placeholder="Unesite korisni&#269;ko ime"
+                           placeholder="Unesite korisničko ime"
                            autocomplete="username"
                            required />
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label"
+                <div class="grupa-polja">
+                    <label class="oznaka-polja"
                            for="lozinka">
                         Lozinka
                     </label>
@@ -145,27 +144,26 @@ ViewBag.Title = "Prijava";
                 </div>
 
                 <button type="submit"
-                        class="login-button">
+                        class="prijava-dugme">
                     Prijavi se
                 </button>
 
             </form>
 
-            <div class="login-links">
+            <div class="prijava-linkovi">
                 Nemate nalog?
 
                 <a href="@Url.Action("Registracija", "Login")">
                     Registrujte se
                 </a>
 
-                <a class="home-link"
+                <a class="pocetna-link"
                    href="@Url.Action("Index", "Home")">
-                    Povratak na po&#269;etnu stranicu
+                    Povratak na početnu stranicu
                 </a>
             </div>
 
         </div>
     </div>
-
 
 </div>
