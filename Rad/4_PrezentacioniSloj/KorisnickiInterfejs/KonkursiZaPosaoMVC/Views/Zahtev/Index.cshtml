@@ -4,10 +4,10 @@
     ViewBag.Title = "Prijave kandidata";
 
 
-string trenutnaPretraga =
-Convert.ToString(
-Request.QueryString["pretraga"]
-);
+    string trenutnaPretraga =
+    Convert.ToString(
+    Request.QueryString["pretraga"]
+    );
 
     string trenutniStatus =
         Convert.ToString(
@@ -33,6 +33,32 @@ Request.QueryString["pretraga"]
         DateTime.Now.ToString(
             "dd.MM.yyyy. HH:mm"
         );
+
+    int? izabraniZahtevId =
+        ViewBag.IzabraniZahtevId == null
+            ? (int?)null
+            : Convert.ToInt32(
+                ViewBag.IzabraniZahtevId
+            );
+
+    System.Data.DataTable detaljiIzabranePrijave =
+        ViewBag.DetaljiIzabranePrijave
+            as System.Data.DataTable;
+
+    System.Data.DataRow izabranaPrijava = null;
+
+    if (Model != null && izabraniZahtevId.HasValue)
+    {
+        foreach (System.Data.DataRow redPrijave in Model.Rows)
+        {
+            if (Convert.ToInt32(redPrijave["ZahtevID"]) ==
+                izabraniZahtevId.Value)
+            {
+                izabranaPrijava = redPrijave;
+                break;
+            }
+        }
+    }
 
 
 }
@@ -467,18 +493,151 @@ Request.QueryString["pretraga"]
         text-align: center;
     }
 
-        .poruka-bez-prijava h3 {
-            margin: 0 0 10px;
-            color: #334155;
-            font-size: 23px;
-            font-weight: 700;
+    .tabela-prijava tbody tr.red-izabran,
+    .tabela-prijava tbody tr.red-izabran:hover {
+        background: #ecfdf5;
+        box-shadow: inset 4px 0 0 #0f766e;
+    }
+
+    .master-detail-okvir {
+        margin-top: 25px;
+        overflow: hidden;
+        border: 1px solid #cbd5e1;
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
+    }
+
+    .master-detail-zaglavlje {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 23px 25px;
+        border-bottom: 1px solid #cbd5e1;
+        background: linear-gradient(135deg, #f8fafc, #ecfdf5);
+    }
+
+    .master-detail-oznaka {
+        display: block;
+        margin-bottom: 5px;
+        color: #0f766e;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .master-detail-naslov {
+        margin: 0 0 5px;
+        color: #0f172a;
+        font-size: 22px;
+        font-weight: 700;
+    }
+
+    .master-detail-opis {
+        margin: 0;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    .master-podaci {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+        padding: 20px 25px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .master-podatak {
+        padding: 13px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        background: #f8fafc;
+    }
+
+    .master-podatak-naziv {
+        display: block;
+        margin-bottom: 5px;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .master-podatak-vrednost {
+        color: #1e293b;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .detail-sadrzaj {
+        padding: 22px 25px 25px;
+    }
+
+    .detail-naslov {
+        margin: 0 0 14px;
+        color: #0f172a;
+        font-size: 17px;
+        font-weight: 700;
+    }
+
+    .detail-tabela {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .detail-tabela th,
+        .detail-tabela td {
+            padding: 12px 13px;
+            border: 1px solid #e2e8f0;
+            text-align: left;
+            vertical-align: middle;
         }
 
-        .poruka-bez-prijava p {
-            margin: 0;
-            color: #64748b;
-            line-height: 1.6;
+        .detail-tabela th {
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 11px;
+            text-transform: uppercase;
         }
+
+    .detail-status {
+        display: inline-block;
+        padding: 5px 9px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .detail-dostavljen {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .detail-nedostaje {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .detail-prazno {
+        padding: 25px;
+        color: #64748b;
+        text-align: center;
+    }
+
+    .poruka-bez-prijava h3 {
+        margin: 0 0 10px;
+        color: #334155;
+        font-size: 23px;
+        font-weight: 700;
+    }
+
+    .poruka-bez-prijava p {
+        margin: 0;
+        color: #64748b;
+        line-height: 1.6;
+    }
 
     @@media (max-width: 1100px) {
         .obrazac-filtera {
@@ -502,6 +661,18 @@ Request.QueryString["pretraga"]
         .tabela-prijava {
             min-width: 950px;
         }
+
+        .master-podaci {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .detail-sadrzaj {
+            overflow-x: auto;
+        }
+
+        .detail-tabela {
+            min-width: 650px;
+        }
     }
 
     @@media (max-width: 650px) {
@@ -524,6 +695,14 @@ Request.QueryString["pretraga"]
         }
 
         .obrazac-filtera {
+            grid-template-columns: 1fr;
+        }
+
+        .master-detail-zaglavlje {
+            flex-direction: column;
+        }
+
+        .master-podaci {
             grid-template-columns: 1fr;
         }
     }
@@ -664,11 +843,11 @@ Request.QueryString["pretraga"]
 
 
     @if (TempData["Poruka"] != null)
-                {
-                    <div class="poruka-uspeha">
-                        @TempData["Poruka"]
-                    </div>
-                }
+    {
+        <div class="poruka-uspeha">
+            @TempData["Poruka"]
+        </div>
+    }
 
     @if (TempData["Greska"] != null)
     {
@@ -877,6 +1056,12 @@ Request.QueryString["pretraga"]
                         var zahtevId =
                             red["ZahtevID"];
 
+                        bool prijavaJeIzabrana =
+                            izabraniZahtevId.HasValue
+                            &&
+                            Convert.ToInt32(zahtevId) ==
+                            izabraniZahtevId.Value;
+
                         string statusPrijave =
                             Convert.ToString(
                                 red["StatusZahteva"]
@@ -924,7 +1109,7 @@ Request.QueryString["pretraga"]
                                 "oznaka-statusa status-odbijena";
                         }
 
-                        <tr>
+                        <tr class="@(prijavaJeIzabrana ? "red-izabran" : string.Empty)">
 
                             <td>
                                 <span class="ime-kandidata">
@@ -944,11 +1129,11 @@ Request.QueryString["pretraga"]
 
                             <td class="datum-podnosenja">
                                 @String.Format(
-                                         "{0:dd.MM.yyyy}",
-                                         Convert.ToDateTime(
-                                             red["DatumPodnosenja"]
-                                         )
-                                     )
+                                              "{0:dd.MM.yyyy}",
+                                              Convert.ToDateTime(
+                                                  red["DatumPodnosenja"]
+                                              )
+                                          )
                             </td>
 
                             <td>
@@ -962,14 +1147,16 @@ Request.QueryString["pretraga"]
                                 <div class="grupa-akcija">
 
                                     <a class="dugme-akcije dugme-detalji"
-                                       href="@Url.Action(
-                                       "Detalji",
-                                       "Zahtev",
-                                       new
-                                       {
-                                           id = zahtevId
-                                       })">
-                                        Detalji
+                                       href="@(Url.Action(
+                                           "Index",
+                                           "Zahtev",
+                                           new
+                                           {
+                                               izabraniZahtevId = zahtevId,
+                                               pretraga = trenutnaPretraga,
+                                               status = trenutniStatus
+                                           }) + "#master-detail")">
+                                        Dokumentacija
                                     </a>
 
                                     <a class="dugme-akcije dugme-izmeni"
@@ -1055,6 +1242,148 @@ Request.QueryString["pretraga"]
             </table>
 
         </div>
+
+        if (izabranaPrijava != null)
+        {
+            <div class="master-detail-okvir"
+                 id="master-detail">
+
+                <div class="master-detail-zaglavlje">
+                    <div>
+                        <span class="master-detail-oznaka">
+                            Detail zapis izabranog mastera
+                        </span>
+
+                        <h2 class="master-detail-naslov">
+                            Dokumentacija prijave #@izabraniZahtevId
+                        </h2>
+
+                        <p class="master-detail-opis">
+                            Prikazana dokumentacija pripada trenutno izabranoj prijavi kandidata.
+                        </p>
+                    </div>
+
+                    <a class="dugme-akcije dugme-detalji"
+                       href="@Url.Action(
+                           "Detalji",
+                           "Zahtev",
+                           new
+                           {
+                               id = izabraniZahtevId
+                           })">
+                        Otvori sve detalje
+                    </a>
+                </div>
+
+                <div class="master-podaci">
+                    <div class="master-podatak">
+                        <span class="master-podatak-naziv">Kandidat</span>
+                        <span class="master-podatak-vrednost">
+                            @izabranaPrijava["ImePrezime"]
+                        </span>
+                    </div>
+
+                    <div class="master-podatak">
+                        <span class="master-podatak-naziv">Konkurs</span>
+                        <span class="master-podatak-vrednost">
+                            @izabranaPrijava["NazivKonkursa"]
+                        </span>
+                    </div>
+
+                    <div class="master-podatak">
+                        <span class="master-podatak-naziv">Radno mesto</span>
+                        <span class="master-podatak-vrednost">
+                            @izabranaPrijava["RadnoMesto"]
+                        </span>
+                    </div>
+
+                    <div class="master-podatak">
+                        <span class="master-podatak-naziv">Status prijave</span>
+                        <span class="master-podatak-vrednost">
+                            @izabranaPrijava["StatusZahteva"]
+                        </span>
+                    </div>
+                </div>
+
+                <div class="detail-sadrzaj">
+                    <h3 class="detail-naslov">
+                        Dokumentacija kandidata
+                    </h3>
+
+                    @if (detaljiIzabranePrijave == null ||
+                         detaljiIzabranePrijave.Rows.Count == 0)
+                    {
+                        <div class="detail-prazno">
+                            Za izabranu prijavu nema evidentirane dokumentacije.
+                        </div>
+                    }
+                    else
+                    {
+                        <table class="detail-tabela">
+                            <thead>
+                                <tr>
+                                    <th>Dokument</th>
+                                    <th>Obavezan</th>
+                                    <th>Dostavljen</th>
+                                    <th>Napomena</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @foreach (System.Data.DataRow detalj in
+                                    detaljiIzabranePrijave.Rows)
+                                {
+                                    bool obavezan =
+                                        detalj["Obavezan"] != DBNull.Value
+                                        &&
+                                        Convert.ToBoolean(
+                                            detalj["Obavezan"]
+                                        );
+
+                                    bool dostavljen =
+                                        detalj["Dostavljen"] != DBNull.Value
+                                        &&
+                                        Convert.ToBoolean(
+                                            detalj["Dostavljen"]
+                                        );
+
+                                    string napomena =
+                                        detalj["Napomena"] == DBNull.Value
+                                            ? string.Empty
+                                            : Convert.ToString(
+                                                detalj["Napomena"]
+                                            );
+
+                                    <tr>
+                                        <td>
+                                            <strong>
+                                                @detalj["NazivDokumenta"]
+                                            </strong>
+                                        </td>
+
+                                        <td>
+                                            @(obavezan ? "Da" : "Ne")
+                                        </td>
+
+                                        <td>
+                                            <span class="detail-status @(dostavljen ? "detail-dostavljen" : "detail-nedostaje")">
+                                                @(dostavljen ? "Dostavljen" : "Nije dostavljen")
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            @(string.IsNullOrWhiteSpace(napomena)
+                                                ? "—"
+                                                : napomena)
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+        }
     }
 
 

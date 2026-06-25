@@ -1,446 +1,233 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 
 namespace KlasePodataka
 {
-    public class SPZahtevZaRegistracijuDBKlasa
+    public class SPDokumentacijaZahtevaDBKlasa
     {
-        private readonly string stringKonekcije;
+        private readonly string _stringKonekcije;
 
-        public SPZahtevZaRegistracijuDBKlasa(
-            string stringKonekcije)
+        public string StringKonekcije
         {
-            this.stringKonekcije = stringKonekcije;
+            get { return _stringKonekcije; }
         }
 
-        private DataSet IzvrsiSelectProceduru(
-            string nazivProcedure,
-            params SqlParameter[] parametri)
+        public SPDokumentacijaZahtevaDBKlasa(
+            string noviStringKonekcije)
         {
-            DataSet podaciSet = new DataSet();
+            if (string.IsNullOrWhiteSpace(noviStringKonekcije))
+            {
+                throw new ArgumentException(
+                    "String konekcije nije podešen.",
+                    "noviStringKonekcije"
+                );
+            }
+
+            _stringKonekcije = noviStringKonekcije;
+        }
+
+        public DataSet DajDokumentacijuZaZahtev(
+            int zahtevID)
+        {
+            DataSet podaciDataSet = new DataSet();
 
             using (SqlConnection konekcija =
-                   new SqlConnection(stringKonekcije))
+                   new SqlConnection(_stringKonekcije))
             using (SqlCommand komanda =
-                   new SqlCommand(nazivProcedure, konekcija))
+                   new SqlCommand(
+                       "DajDokumentacijuZaZahtev",
+                       konekcija))
             {
                 komanda.CommandType =
                     CommandType.StoredProcedure;
 
-                if (parametri != null &&
-                    parametri.Length > 0)
-                {
-                    komanda.Parameters.AddRange(parametri);
-                }
+                komanda.Parameters.Add(
+                    "@ZahtevID",
+                    SqlDbType.Int
+                ).Value = zahtevID;
 
                 using (SqlDataAdapter adapter =
                        new SqlDataAdapter(komanda))
                 {
-                    adapter.Fill(podaciSet);
+                    adapter.Fill(podaciDataSet);
                 }
             }
 
-            return podaciSet;
+            return podaciDataSet;
         }
 
-        public DataSet DajSveZahteveZaRegistraciju()
-        {
-            return IzvrsiSelectProceduru(
-                "DajSveZahteveZaRegistraciju"
-            );
-        }
-
-        public DataSet DajPrijaveKorisnika(
-            int korisnikId)
-        {
-            SqlParameter parametar =
-                new SqlParameter(
-                    "@KorisnikID",
-                    SqlDbType.Int
-                );
-
-            parametar.Value = korisnikId;
-
-            return IzvrsiSelectProceduru(
-                "DajPrijaveKorisnika",
-                parametar
-            );
-        }
-
-        public DataSet DajZahteveZaRegistracijuSaFilterom(
-            string filter)
-        {
-            SqlParameter parametar =
-                new SqlParameter(
-                    "@Filter",
-                    SqlDbType.NVarChar,
-                    200
-                );
-
-            parametar.Value =
-                string.IsNullOrWhiteSpace(filter)
-                    ? (object)DBNull.Value
-                    : filter;
-
-            return IzvrsiSelectProceduru(
-                "DajZahteveZaRegistracijuSaFilterom",
-                parametar
-            );
-        }
-
-        public DataSet DajZahtevZaRegistracijuSaDokumentacijom(
-            int zahtevId)
-        {
-            SqlParameter parametar =
-                new SqlParameter(
-                    "@ZahtevID",
-                    SqlDbType.Int
-                );
-
-            parametar.Value = zahtevId;
-
-            return IzvrsiSelectProceduru(
-                "DajZahtevZaRegistracijuSaDokumentacijom",
-                parametar
-            );
-        }
-
-        private SqlCommand KreirajKomanduZaZahtev(
-            SqlConnection konekcija,
-            SqlTransaction transakcija,
+        private bool IzvrsiTransakcionuProceduru(
             string nazivProcedure,
-            ZahtevZaRegistracijuKlasa zahtev,
-            bool dodajZahtevId)
-        {
-            SqlCommand komanda =
-                new SqlCommand(
-                    nazivProcedure,
-                    konekcija,
-                    transakcija
-                );
-
-            komanda.CommandType =
-                CommandType.StoredProcedure;
-
-            if (dodajZahtevId)
-            {
-                komanda.Parameters.Add(
-                    "@ZahtevID",
-                    SqlDbType.Int
-                ).Value = zahtev.ZahtevID;
-            }
-            else
-            {
-                komanda.Parameters.Add(
-                    "@KorisnikID",
-                    SqlDbType.Int
-                ).Value = zahtev.KorisnikID;
-            }
-
-            komanda.Parameters.Add(
-                "@ImePrezime",
-                SqlDbType.NVarChar,
-                100
-            ).Value = zahtev.ImePrezime;
-
-            komanda.Parameters.Add(
-                "@Email",
-                SqlDbType.NVarChar,
-                100
-            ).Value = zahtev.Email;
-
-            komanda.Parameters.Add(
-                "@KontaktTelefon",
-                SqlDbType.NVarChar,
-                20
-            ).Value = zahtev.KontaktTelefon;
-
-            komanda.Parameters.Add(
-                "@PoslednjaSkola",
-                SqlDbType.NVarChar,
-                150
-            ).Value = zahtev.PoslednjaSkola;
-
-            komanda.Parameters.Add(
-                "@MestoSkole",
-                SqlDbType.NVarChar,
-                100
-            ).Value = string.IsNullOrWhiteSpace(
-                zahtev.MestoSkole)
-                    ? (object)DBNull.Value
-                    : zahtev.MestoSkole;
-
-            komanda.Parameters.Add(
-                "@Zanimanje",
-                SqlDbType.NVarChar,
-                150
-            ).Value = zahtev.Zanimanje;
-
-            komanda.Parameters.Add(
-                "@NazivKonkursa",
-                SqlDbType.NVarChar,
-                150
-            ).Value = zahtev.NazivKonkursa;
-
-            komanda.Parameters.Add(
-                "@RadnoMesto",
-                SqlDbType.NVarChar,
-                150
-            ).Value = zahtev.RadnoMesto;
-
-            komanda.Parameters.Add(
-                "@StepenObrazovanja",
-                SqlDbType.NVarChar,
-                80
-            ).Value = zahtev.StepenObrazovanja;
-
-            komanda.Parameters.Add(
-                "@GodineIskustva",
-                SqlDbType.Int
-            ).Value = zahtev.GodineIskustva;
-
-            komanda.Parameters.Add(
-                "@MotivacionoPismo",
-                SqlDbType.NVarChar,
-                -1
-            ).Value = string.IsNullOrWhiteSpace(
-                zahtev.MotivacionoPismo)
-                    ? (object)DBNull.Value
-                    : zahtev.MotivacionoPismo;
-
-            komanda.Parameters.Add(
-                "@DatumPodnosenja",
-                SqlDbType.Date
-            ).Value = zahtev.DatumPodnosenja.Date;
-
-            komanda.Parameters.Add(
-                "@RokKonkursa",
-                SqlDbType.Date
-            ).Value = zahtev.RokKonkursa.Date;
-
-            komanda.Parameters.Add(
-                "@StatusZahteva",
-                SqlDbType.NVarChar,
-                30
-            ).Value = zahtev.StatusZahteva;
-
-            komanda.Parameters.Add(
-                "@IspunjavaOsnovneUslove",
-                SqlDbType.Bit
-            ).Value = zahtev.IspunjavaOsnovneUslove;
-
-            return komanda;
-        }
-
-        private void DodajDokumentaciju(
-            SqlConnection konekcija,
-            SqlTransaction transakcija,
-            int zahtevId,
-            List<int> dokumenta)
-        {
-            if (dokumenta == null)
-            {
-                return;
-            }
-
-            foreach (int tipDokumentaId in dokumenta)
-            {
-                using (SqlCommand komanda =
-                       new SqlCommand(
-                           "DodajDokumentacijuZahteva",
-                           konekcija,
-                           transakcija))
-                {
-                    komanda.CommandType =
-                        CommandType.StoredProcedure;
-
-                    komanda.Parameters.Add(
-                        "@ZahtevID",
-                        SqlDbType.Int
-                    ).Value = zahtevId;
-
-                    komanda.Parameters.Add(
-                        "@TipDokumentaID",
-                        SqlDbType.Int
-                    ).Value = tipDokumentaId;
-
-                    komanda.Parameters.Add(
-                        "@Dostavljen",
-                        SqlDbType.Bit
-                    ).Value = true;
-
-                    komanda.Parameters.Add(
-                        "@Napomena",
-                        SqlDbType.NVarChar,
-                        200
-                    ).Value = string.Empty;
-
-                    komanda.ExecuteNonQuery();
-                }
-            }
-        }
-
-        public bool SnimiNoviZahtevSaDokumentacijom(
-            ZahtevZaRegistracijuKlasa zahtev,
-            List<int> dokumenta)
+            params SqlParameter[] parametri)
         {
             using (SqlConnection konekcija =
-                   new SqlConnection(stringKonekcije))
+                   new SqlConnection(_stringKonekcije))
             {
                 konekcija.Open();
 
                 using (SqlTransaction transakcija =
-                       konekcija.BeginTransaction())
-                {
-                    try
-                    {
-                        int zahtevId;
-
-                        using (SqlCommand komanda =
-                               KreirajKomanduZaZahtev(
-                                   konekcija,
-                                   transakcija,
-                                   "DodajNoviZahtevZaRegistraciju",
-                                   zahtev,
-                                   false))
-                        {
-                            zahtevId = Convert.ToInt32(
-                                komanda.ExecuteScalar()
-                            );
-                        }
-
-                        DodajDokumentaciju(
-                            konekcija,
-                            transakcija,
-                            zahtevId,
-                            dokumenta
-                        );
-
-                        transakcija.Commit();
-                        return true;
-                    }
-                    catch
-                    {
-                        transakcija.Rollback();
-                        throw;
-                    }
-                }
-            }
-        }
-
-        public bool IzmeniZahtevSaDokumentacijom(
-            ZahtevZaRegistracijuKlasa zahtev,
-            List<int> dokumenta)
-        {
-            using (SqlConnection konekcija =
-                   new SqlConnection(stringKonekcije))
-            {
-                konekcija.Open();
-
-                using (SqlTransaction transakcija =
-                       konekcija.BeginTransaction())
+                       konekcija.BeginTransaction(
+                           IsolationLevel.ReadCommitted))
                 {
                     try
                     {
                         using (SqlCommand komanda =
-                               KreirajKomanduZaZahtev(
-                                   konekcija,
-                                   transakcija,
-                                   "IzmeniZahtevZaRegistraciju",
-                                   zahtev,
-                                   true))
-                        {
-                            komanda.ExecuteNonQuery();
-                        }
-
-                        using (SqlCommand brisanje =
                                new SqlCommand(
-                                   "ObrisiDokumentacijuZaZahtev",
+                                   nazivProcedure,
                                    konekcija,
                                    transakcija))
                         {
-                            brisanje.CommandType =
+                            komanda.CommandType =
                                 CommandType.StoredProcedure;
 
-                            brisanje.Parameters.Add(
-                                "@ZahtevID",
-                                SqlDbType.Int
-                            ).Value = zahtev.ZahtevID;
+                            if (parametri != null &&
+                                parametri.Length > 0)
+                            {
+                                komanda.Parameters.AddRange(
+                                    parametri
+                                );
+                            }
 
-                            brisanje.ExecuteNonQuery();
+                            komanda.ExecuteNonQuery();
                         }
 
-                        DodajDokumentaciju(
-                            konekcija,
-                            transakcija,
-                            zahtev.ZahtevID,
-                            dokumenta
-                        );
-
                         transakcija.Commit();
+
                         return true;
                     }
                     catch
                     {
-                        transakcija.Rollback();
+                        if (transakcija.Connection != null)
+                        {
+                            transakcija.Rollback();
+                        }
+
                         throw;
                     }
                 }
             }
         }
 
-        private bool IzvrsiKomanduZaZahtev(
-            string nazivProcedure,
-            int zahtevId,
-            string statusZahteva)
+        public bool DodajDokumentaciju(
+            int zahtevID,
+            int tipDokumentaID,
+            bool dostavljen,
+            string napomena)
         {
-            using (SqlConnection konekcija =
-                   new SqlConnection(stringKonekcije))
-            using (SqlCommand komanda =
-                   new SqlCommand(nazivProcedure, konekcija))
-            {
-                komanda.CommandType =
-                    CommandType.StoredProcedure;
-
-                komanda.Parameters.Add(
+            return IzvrsiTransakcionuProceduru(
+                "DodajDokumentacijuZahteva",
+                new SqlParameter(
                     "@ZahtevID",
                     SqlDbType.Int
-                ).Value = zahtevId;
-
-                if (statusZahteva != null)
+                )
                 {
-                    komanda.Parameters.Add(
-                        "@StatusZahteva",
-                        SqlDbType.NVarChar,
-                        30
-                    ).Value = statusZahteva;
+                    Value = zahtevID
+                },
+                new SqlParameter(
+                    "@TipDokumentaID",
+                    SqlDbType.Int
+                )
+                {
+                    Value = tipDokumentaID
+                },
+                new SqlParameter(
+                    "@Dostavljen",
+                    SqlDbType.Bit
+                )
+                {
+                    Value = dostavljen
+                },
+                new SqlParameter(
+                    "@Napomena",
+                    SqlDbType.NVarChar,
+                    200
+                )
+                {
+                    Value = string.IsNullOrWhiteSpace(napomena)
+                        ? (object)DBNull.Value
+                        : napomena
                 }
-
-                konekcija.Open();
-                return komanda.ExecuteNonQuery() > 0;
-            }
-        }
-
-        public bool ObrisiZahtevZaRegistraciju(
-            int zahtevId)
-        {
-            return IzvrsiKomanduZaZahtev(
-                "ObrisiZahtevZaRegistraciju",
-                zahtevId,
-                null
             );
         }
 
-        public bool PromeniStatusZahteva(
-            int zahtevId,
-            string statusZahteva)
+        public bool IzmeniDokumentaciju(
+            int dokumentacijaID,
+            int zahtevID,
+            int tipDokumentaID,
+            bool dostavljen,
+            string napomena)
         {
-            return IzvrsiKomanduZaZahtev(
-                "PromeniStatusZahteva",
-                zahtevId,
-                statusZahteva
+            return IzvrsiTransakcionuProceduru(
+                "IzmeniDokumentacijuZahteva",
+                new SqlParameter(
+                    "@DokumentacijaID",
+                    SqlDbType.Int
+                )
+                {
+                    Value = dokumentacijaID
+                },
+                new SqlParameter(
+                    "@ZahtevID",
+                    SqlDbType.Int
+                )
+                {
+                    Value = zahtevID
+                },
+                new SqlParameter(
+                    "@TipDokumentaID",
+                    SqlDbType.Int
+                )
+                {
+                    Value = tipDokumentaID
+                },
+                new SqlParameter(
+                    "@Dostavljen",
+                    SqlDbType.Bit
+                )
+                {
+                    Value = dostavljen
+                },
+                new SqlParameter(
+                    "@Napomena",
+                    SqlDbType.NVarChar,
+                    200
+                )
+                {
+                    Value = string.IsNullOrWhiteSpace(napomena)
+                        ? (object)DBNull.Value
+                        : napomena
+                }
+            );
+        }
+
+        public bool ObrisiDokumentaciju(
+            int dokumentacijaID)
+        {
+            return IzvrsiTransakcionuProceduru(
+                "ObrisiDokumentacijuZahteva",
+                new SqlParameter(
+                    "@DokumentacijaID",
+                    SqlDbType.Int
+                )
+                {
+                    Value = dokumentacijaID
+                }
+            );
+        }
+
+        public bool ObrisiDokumentacijuPoZahtevu(
+            int zahtevID)
+        {
+            return IzvrsiTransakcionuProceduru(
+                "ObrisiDokumentacijuZaZahtev",
+                new SqlParameter(
+                    "@ZahtevID",
+                    SqlDbType.Int
+                )
+                {
+                    Value = zahtevID
+                }
             );
         }
     }

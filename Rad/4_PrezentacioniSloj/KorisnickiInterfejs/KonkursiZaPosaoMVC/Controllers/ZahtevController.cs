@@ -125,7 +125,8 @@ namespace KonkursiZaPosaoMVC.Controllers
         [ActionName("Index")]
         public ActionResult PrikaziSvePrijave(
             string pretraga,
-            string status)
+            string status,
+            int? izabraniZahtevId)
         {
             if (!KorisnikJePrijavljen())
             {
@@ -171,6 +172,9 @@ namespace KonkursiZaPosaoMVC.Controllers
 
             if (skupPodataka.Tables.Count == 0)
             {
+                ViewBag.IzabraniZahtevId = null;
+                ViewBag.DetaljiIzabranePrijave = null;
+
                 return View(
                     new DataTable()
                 );
@@ -198,6 +202,50 @@ namespace KonkursiZaPosaoMVC.Controllers
                 tabela =
                     pogled.ToTable();
             }
+
+            if (tabela.Rows.Count == 0)
+            {
+                ViewBag.IzabraniZahtevId = null;
+                ViewBag.DetaljiIzabranePrijave = null;
+
+                return View(tabela);
+            }
+
+            bool izabraniZahtevPostojiUTabeli =
+                false;
+
+            if (izabraniZahtevId.HasValue)
+            {
+                foreach (DataRow red in tabela.Rows)
+                {
+                    if (Convert.ToInt32(red["ZahtevID"]) ==
+                        izabraniZahtevId.Value)
+                    {
+                        izabraniZahtevPostojiUTabeli = true;
+                        break;
+                    }
+                }
+            }
+
+            int stvarniIzabraniZahtevId =
+                izabraniZahtevPostojiUTabeli
+                    ? izabraniZahtevId.Value
+                    : Convert.ToInt32(
+                        tabela.Rows[0]["ZahtevID"]
+                    );
+
+            DataSet detaljiIzabranePrijave =
+                bazaPodataka.DajZahtevZaRegistracijuSaDokumentacijom(
+                    stvarniIzabraniZahtevId
+                );
+
+            ViewBag.IzabraniZahtevId =
+                stvarniIzabraniZahtevId;
+
+            ViewBag.DetaljiIzabranePrijave =
+                detaljiIzabranePrijave.Tables.Count > 0
+                    ? detaljiIzabranePrijave.Tables[0]
+                    : null;
 
             return View(tabela);
         }

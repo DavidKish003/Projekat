@@ -109,6 +109,77 @@
             return "☐";
         };
 
+    Func<string, string, bool> nazivDokumentaSePoklapa =
+        delegate (
+            string nazivIzBaze,
+            string nazivZaPrikaz)
+        {
+            if (string.Equals(
+                nazivIzBaze,
+                nazivZaPrikaz,
+                StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            if (string.Equals(
+                nazivZaPrikaz,
+                "Biografija (CV)",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                return
+                    string.Equals(
+                        nazivIzBaze,
+                        "CV",
+                        StringComparison.OrdinalIgnoreCase
+                    )
+                    ||
+                    string.Equals(
+                        nazivIzBaze,
+                        "Biografija",
+                        StringComparison.OrdinalIgnoreCase
+                    );
+            }
+
+            if (string.Equals(
+                nazivZaPrikaz,
+                "Motivaciono pismo",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                return string.Equals(
+                    nazivIzBaze,
+                    "Motivaciono",
+                    StringComparison.OrdinalIgnoreCase
+                );
+            }
+
+            if (string.Equals(
+                nazivZaPrikaz,
+                "Diploma ili potvrda o obrazovanju",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                return string.Equals(
+                    nazivIzBaze,
+                    "Diploma",
+                    StringComparison.OrdinalIgnoreCase
+                );
+            }
+
+            if (string.Equals(
+                nazivZaPrikaz,
+                "Preporuka prethodnog poslodavca",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                return string.Equals(
+                    nazivIzBaze,
+                    "Preporuka",
+                    StringComparison.OrdinalIgnoreCase
+                );
+            }
+
+            return false;
+        };
+
     Func<string, bool> dokumentJeDostavljen =
         delegate (string nazivDokumenta)
         {
@@ -119,10 +190,12 @@
 
             foreach (var dokument in Model.Dokumentacija)
             {
-                if (string.Equals(
-                    Convert.ToString(dokument.NazivDokumenta),
-                    nazivDokumenta,
-                    StringComparison.OrdinalIgnoreCase))
+                string nazivIzBaze =
+                    Convert.ToString(dokument.NazivDokumenta);
+
+                if (nazivDokumentaSePoklapa(
+                    nazivIzBaze,
+                    nazivDokumenta))
                 {
                     return dokument.Dostavljen;
                 }
@@ -131,16 +204,66 @@
             return false;
         };
 
-    Func<string, string> oznakaDokumenta =
+    Func<string, string> napomenaDokumenta =
+        delegate (string nazivDokumenta)
+        {
+            if (Model.Dokumentacija == null)
+            {
+                return "";
+            }
+
+            foreach (var dokument in Model.Dokumentacija)
+            {
+                string nazivIzBaze =
+                    Convert.ToString(dokument.NazivDokumenta);
+
+                if (nazivDokumentaSePoklapa(
+                    nazivIzBaze,
+                    nazivDokumenta))
+                {
+                    return Convert.ToString(dokument.Napomena);
+                }
+            }
+
+            return "";
+        };
+
+    Func<string, bool> dokumentJeObavezan =
+        delegate (string nazivDokumenta)
+        {
+            return
+                string.Equals(
+                    nazivDokumenta,
+                    "Biografija (CV)",
+                    StringComparison.OrdinalIgnoreCase
+                )
+                ||
+                string.Equals(
+                    nazivDokumenta,
+                    "Diploma ili potvrda o obrazovanju",
+                    StringComparison.OrdinalIgnoreCase
+                );
+        };
+
+    Func<string, string> statusDokumenta =
         delegate (string nazivDokumenta)
         {
             if (dokumentJeDostavljen(nazivDokumenta))
             {
-                return "☑";
+                return "Dostavljen";
             }
 
-            return "☐";
+            return "Nije dostavljen";
         };
+
+    string[] sviDokumenti =
+    {
+        "Biografija (CV)",
+        "Motivaciono pismo",
+        "Diploma ili potvrda o obrazovanju",
+        "Preporuka prethodnog poslodavca"
+    };
+
 }
 
 <style>
@@ -323,6 +446,47 @@
         list-style: none;
     }
 
+    .detail-tabela-okvir {
+        overflow-x: auto;
+    }
+
+    .detail-tabela {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .detail-tabela th,
+        .detail-tabela td {
+            padding: 13px 14px;
+            border: 1px solid #e2e8f0;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .detail-tabela th {
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+        }
+
+    .detail-obavezan {
+        color: #9a3412;
+        font-weight: 700;
+    }
+
+    .detail-opciono {
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .detail-napomena {
+        color: #475569;
+        font-size: 13px;
+    }
+
     .stavka-dokumenta {
         display: flex;
         align-items: center;
@@ -433,6 +597,10 @@
 
         .mreza-podataka {
             grid-template-columns: 1fr;
+        }
+
+        .detail-tabela {
+            min-width: 650px;
         }
 
         .red-podatka {
@@ -571,9 +739,10 @@
         }
 
         .stampano-checkbox-cell {
-            width: 10mm !important;
+            width: 35mm !important;
             text-align: center !important;
-            font-size: 12pt !important;
+            font-size: 8.5pt !important;
+            font-weight: bold !important;
             padding: 1mm !important;
         }
 
@@ -783,9 +952,9 @@
 
                     <span class="vrednost-podatka">
                         @String.Format(
-                                 "{0:dd.MM.yyyy}",
-                                 Model.DatumPodnosenja
-                             )
+                                           "{0:dd.MM.yyyy}",
+                                           Model.DatumPodnosenja
+                                       )
                     </span>
                 </div>
 
@@ -796,9 +965,9 @@
 
                     <span class="vrednost-podatka">
                         @String.Format(
-                                 "{0:dd.MM.yyyy}",
-                                 Model.RokKonkursa
-                             )
+                                           "{0:dd.MM.yyyy}",
+                                           Model.RokKonkursa
+                                       )
                     </span>
                 </div>
 
@@ -864,43 +1033,81 @@
                 Dokumentacija
             </h2>
 
-            @if (Model.Dokumentacija != null &&
-                 Model.Dokumentacija.Count > 0)
-            {
-                <ul class="spisak-dokumenata">
+            <div class="detail-tabela-okvir">
+                <table class="detail-tabela">
+                    <thead>
+                        <tr>
+                            <th>Dokument</th>
+                            <th>Obavezan</th>
+                            <th>Status dokumenta</th>
+                            <th>Napomena</th>
+                        </tr>
+                    </thead>
 
-                    @foreach (var dokument in Model.Dokumentacija)
-                    {
-                        <li class="stavka-dokumenta">
+                    <tbody>
+                        @foreach (string nazivDokumenta in sviDokumenti)
+                        {
+                            bool dostavljen =
+                                dokumentJeDostavljen(nazivDokumenta);
 
-                            <span class="naziv-dokumenta">
-                                @dokument.NazivDokumenta
-                            </span>
+                            bool obavezan =
+                                dokumentJeObavezan(nazivDokumenta);
 
-                            @if (dokument.Dostavljen)
-                            {
-                                <span class="dokument-dostavljen">
-                                    Dostavljen
-                                </span>
-                            }
-                            else
-                            {
-                                <span class="dokument-nije-dostavljen">
-                                    Nije dostavljen
-                                </span>
-                            }
+                            string napomena =
+                                napomenaDokumenta(nazivDokumenta);
 
-                        </li>
-                    }
+                            <tr>
+                                <td>
+                                    <span class="naziv-dokumenta">
+                                        @nazivDokumenta
+                                    </span>
+                                </td>
 
-                </ul>
-            }
-            else
-            {
-                <p class="prazan-sadrzaj">
-                    Nema podataka o dokumentaciji.
-                </p>
-            }
+                                <td>
+                                    @if (obavezan)
+                                    {
+                                        <span class="detail-obavezan">
+                                            Da
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="detail-opciono">
+                                            Ne
+                                        </span>
+                                    }
+                                </td>
+
+                                <td>
+                                    @if (dostavljen)
+                                    {
+                                        <span class="dokument-dostavljen">
+                                            Dostavljen
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="dokument-nije-dostavljen">
+                                            Nije dostavljen
+                                        </span>
+                                    }
+                                </td>
+
+                                <td class="detail-napomena">
+                                    @if (string.IsNullOrWhiteSpace(napomena))
+                                    {
+                                        <span>—</span>
+                                    }
+                                    else
+                                    {
+                                        @napomena
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
 
         </div>
 
@@ -1062,9 +1269,9 @@
 
             <td class="stampano-vrednost">
                 @String.Format(
-                         "{0:dd.MM.yyyy}",
-                         Model.DatumPodnosenja
-                     )
+                                   "{0:dd.MM.yyyy}",
+                                   Model.DatumPodnosenja
+                               )
             </td>
         </tr>
 
@@ -1075,9 +1282,9 @@
 
             <td class="stampano-vrednost">
                 @String.Format(
-                         "{0:dd.MM.yyyy}",
-                         Model.RokKonkursa
-                     )
+                                   "{0:dd.MM.yyyy}",
+                                   Model.RokKonkursa
+                               )
             </td>
         </tr>
 
@@ -1105,7 +1312,7 @@
             </td>
 
             <td class="stampano-checkbox-cell">
-                @oznakaDokumenta("Biografija (CV)")
+                @statusDokumenta("Biografija (CV)")
             </td>
         </tr>
 
@@ -1115,7 +1322,7 @@
             </td>
 
             <td class="stampano-checkbox-cell">
-                @oznakaDokumenta("Motivaciono pismo")
+                @statusDokumenta("Motivaciono pismo")
             </td>
         </tr>
 
@@ -1125,7 +1332,7 @@
             </td>
 
             <td class="stampano-checkbox-cell">
-                @oznakaDokumenta("Diploma ili potvrda o obrazovanju")
+                @statusDokumenta("Diploma ili potvrda o obrazovanju")
             </td>
         </tr>
 
@@ -1135,7 +1342,7 @@
             </td>
 
             <td class="stampano-checkbox-cell">
-                @oznakaDokumenta("Preporuka prethodnog poslodavca")
+                @statusDokumenta("Preporuka prethodnog poslodavca")
             </td>
         </tr>
 
