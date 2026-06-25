@@ -287,7 +287,7 @@ namespace KlasePodataka
             List<int> dokumenta)
         {
             using (SqlConnection konekcija =
-                   new SqlConnection(connectionString))
+                   new SqlConnection(stringKonekcije))
             {
                 konekcija.Open();
 
@@ -335,7 +335,7 @@ namespace KlasePodataka
             List<int> dokumenta)
         {
             using (SqlConnection konekcija =
-                   new SqlConnection(connectionString))
+                   new SqlConnection(stringKonekcije))
             {
                 konekcija.Open();
 
@@ -397,7 +397,7 @@ namespace KlasePodataka
             string statusZahteva)
         {
             using (SqlConnection konekcija =
-                   new SqlConnection(connectionString))
+                   new SqlConnection(stringKonekcije))
             using (SqlCommand komanda =
                    new SqlCommand(nazivProcedure, konekcija))
             {

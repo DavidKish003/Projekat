@@ -13,7 +13,7 @@ namespace DBUtils
           * Responsibility - ODGOVORNOST: Konekcija na celinu baze podataka, SQL server tipa  
           Collaboration - zavisi od standardne klase SQlConnection iz biblioteke System.Data.SqlClient*/
 
-        #region Atributi
+
         private SqlConnection _konekcija;
         //
         private string _putanjaBaze;
@@ -22,7 +22,7 @@ namespace DBUtils
         private string _stringKonekcije;
         #endregion
 
-        #region Konstruktor
+
         public KonekcijaKlasa(string nazivDBMSInstance, string putanjaBaze, string nazivBaze)
         {
             _putanjaBaze = putanjaBaze;
@@ -41,7 +41,7 @@ namespace DBUtils
         }
         #endregion
 
-        #region Privatne metode
+
         private string DajStringKonekcije()
         {
             string pomStringKonekcije;
@@ -66,7 +66,7 @@ namespace DBUtils
         }
         #endregion
 
-        #region Javne metode
+
         public bool OtvoriKonekciju()
         {
             bool uspeh;

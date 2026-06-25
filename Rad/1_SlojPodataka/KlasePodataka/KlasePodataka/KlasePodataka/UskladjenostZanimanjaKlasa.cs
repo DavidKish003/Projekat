@@ -1,6 +1,6 @@
-﻿namespace KonkursiZaPosaoServis.Models
+﻿namespace KlasePodataka
 {
-    public class UskladjenostZanimanjaModel
+    public class UskladjenostZanimanjaKlasa
     {
         public string Zanimanje { get; set; }
 

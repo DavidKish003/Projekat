@@ -27,12 +27,17 @@ namespace PoslovnaLogika
                     radnoMesto
                 );
 
-            if (rezultat == null)
+            if (rezultat != null)
             {
-                return false;
+                return rezultat.IspunjavaOsnovneUslove;
             }
 
-            return rezultat.IspunjavaOsnovneUslove;
+            return ProveriDaLiKandidatIspunjavaUsloveLokalno(
+                datumPodnosenja,
+                rokKonkursa,
+                zanimanje,
+                radnoMesto
+            );
         }
 
         public string OdrediPocetniStatus(
@@ -41,6 +46,11 @@ namespace PoslovnaLogika
             string zanimanje,
             string radnoMesto)
         {
+            if (datumPodnosenja.Date > rokKonkursa.Date)
+            {
+                return "Odbijena";
+            }
+
             ProveraUslovaRestResponse rezultat =
                 ProveriUslovePrekoRestServisa(
                     datumPodnosenja,
@@ -49,13 +59,30 @@ namespace PoslovnaLogika
                     radnoMesto
                 );
 
-            if (rezultat == null ||
-                string.IsNullOrWhiteSpace(rezultat.StatusZahteva))
+            bool ispunjavaOsnovneUslove;
+
+            if (rezultat != null)
             {
-                return "Odbijena";
+                ispunjavaOsnovneUslove =
+                    rezultat.IspunjavaOsnovneUslove;
+            }
+            else
+            {
+                ispunjavaOsnovneUslove =
+                    ProveriDaLiKandidatIspunjavaUsloveLokalno(
+                        datumPodnosenja,
+                        rokKonkursa,
+                        zanimanje,
+                        radnoMesto
+                    );
             }
 
-            return rezultat.StatusZahteva;
+            if (ispunjavaOsnovneUslove)
+            {
+                return "U razmatranju";
+            }
+
+            return "Primljena";
         }
 
         public bool ProveriDaLiKandidatIspunjavaUsloveLokalno(
@@ -168,6 +195,11 @@ namespace PoslovnaLogika
                             .GetAwaiter()
                             .GetResult();
 
+                    if (string.IsNullOrWhiteSpace(jsonOdgovor))
+                    {
+                        return null;
+                    }
+
                     ProveraUslovaRestResponse rezultat =
                         serializer.Deserialize<ProveraUslovaRestResponse>(
                             jsonOdgovor
@@ -192,65 +224,136 @@ namespace PoslovnaLogika
             string radnoMestoNormalizovano =
                 NormalizujTekst(radnoMesto);
 
+            if (string.IsNullOrWhiteSpace(zanimanjeNormalizovano) ||
+                string.IsNullOrWhiteSpace(radnoMestoNormalizovano))
+            {
+                return false;
+            }
+
             if (zanimanjeNormalizovano == radnoMestoNormalizovano)
             {
                 return true;
             }
 
-            Dictionary<string, List<string>> dozvoljenaZanimanja =
-                new Dictionary<string, List<string>>
+            List<DozvoljenaUskladjenost> dozvoljeneUskladjenosti =
+                new List<DozvoljenaUskladjenost>
                 {
+                    new DozvoljenaUskladjenost
                     {
-                        "programer",
-                        new List<string>
-                        {
-                            "programer",
-                            "softverski inzenjer",
-                            "web developer",
-                            "backend developer",
-                            "frontend developer"
-                        }
+                        Zanimanje = "elektrotehnicar informacionih tehnologija",
+                        RadnoMesto = "junior programer"
                     },
+
+                    new DozvoljenaUskladjenost
                     {
-                        "administrator",
-                        new List<string>
-                        {
-                            "administrator",
-                            "it administrator",
-                            "sistemski administrator"
-                        }
+                        Zanimanje = "elektrotehnicar informacionih tehnologija",
+                        RadnoMesto = "programer"
                     },
+
+                    new DozvoljenaUskladjenost
                     {
-                        "ekonomista",
-                        new List<string>
-                        {
-                            "ekonomista",
-                            "racunovodja",
-                            "finansijski administrator"
-                        }
+                        Zanimanje = "elektrotehnicar informacionih tehnologija",
+                        RadnoMesto = "web developer"
                     },
+
+                    new DozvoljenaUskladjenost
                     {
-                        "masinski tehnicar",
-                        new List<string>
-                        {
-                            "masinski tehnicar",
-                            "tehnicar odrzavanja",
-                            "operater masine"
-                        }
+                        Zanimanje = "elektrotehnicar racunara",
+                        RadnoMesto = "junior programer"
+                    },
+
+                    new DozvoljenaUskladjenost
+                    {
+                        Zanimanje = "programer",
+                        RadnoMesto = "junior programer"
+                    },
+
+                    new DozvoljenaUskladjenost
+                    {
+                        Zanimanje = "programer",
+                        RadnoMesto = "web developer"
+                    },
+
+                    new DozvoljenaUskladjenost
+                    {
+                        Zanimanje = "programer",
+                        RadnoMesto = "backend developer"
+                    },
+
+                    new DozvoljenaUskladjenost
+                    {
+                        Zanimanje = "programer",
+                        RadnoMesto = "frontend developer"
+                    },
+
+                    new DozvoljenaUskladjenost
+                    {
+                        Zanimanje = "softverski inzenjer",
+                        RadnoMesto = "programer"
+                    },
+
+                    new DozvoljenaUskladjenost
+                    {
+                        Zanimanje = "softverski inzenjer",
+                        RadnoMesto = "junior programer"
+                    },
+
+                    new DozvoljenaUskladjenost
+                    {
+                        Zanimanje = "it administrator",
+                        RadnoMesto = "administrator"
+                    },
+
+                    new DozvoljenaUskladjenost
+                    {
+                        Zanimanje = "it administrator",
+                        RadnoMesto = "sistemski administrator"
+                    },
+
+                    new DozvoljenaUskladjenost
+                    {
+                        Zanimanje = "ekonomista",
+                        RadnoMesto = "knjigovodja"
+                    },
+
+                    new DozvoljenaUskladjenost
+                    {
+                        Zanimanje = "ekonomista",
+                        RadnoMesto = "racunovodja"
+                    },
+
+                    new DozvoljenaUskladjenost
+                    {
+                        Zanimanje = "masinski tehnicar",
+                        RadnoMesto = "tehnicar odrzavanja"
+                    },
+
+                    new DozvoljenaUskladjenost
+                    {
+                        Zanimanje = "masinski tehnicar",
+                        RadnoMesto = "operater masine"
                     }
                 };
 
-            foreach (var grupa in dozvoljenaZanimanja)
+            foreach (DozvoljenaUskladjenost uskladjenost in dozvoljeneUskladjenosti)
             {
-                bool zanimanjeJeUGrupi =
-                    grupa.Value.Any(x =>
-                        NormalizujTekst(x) == zanimanjeNormalizovano);
+                string evidentiranoZanimanje =
+                    NormalizujTekst(
+                        uskladjenost.Zanimanje
+                    );
 
-                bool radnoMestoJeUGrupi =
-                    grupa.Value.Any(x =>
-                        NormalizujTekst(x) == radnoMestoNormalizovano);
+                string evidentiranoRadnoMesto =
+                    NormalizujTekst(
+                        uskladjenost.RadnoMesto
+                    );
 
-                if (zanimanjeJeUGrupi && radnoMestoJeUGrupi)
+                bool istoZanimanje =
+                    zanimanjeNormalizovano == evidentiranoZanimanje;
+
+                bool istoRadnoMesto =
+                    radnoMestoNormalizovano == evidentiranoRadnoMesto;
+
+                if (istoZanimanje && istoRadnoMesto)
                 {
                     return true;
                 }
@@ -293,5 +396,12 @@ namespace PoslovnaLogika
         public bool IspunjavaOsnovneUslove { get; set; }
 
         public string StatusZahteva { get; set; }
+    }
+
+    public class DozvoljenaUskladjenost
+    {
+        public string Zanimanje { get; set; }
+
+        public string RadnoMesto { get; set; }
     }
 }

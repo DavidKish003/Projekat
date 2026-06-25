@@ -68,6 +68,7 @@
     <Compile Include="SPZahtevZaRegistracijuDBKlasa.cs" />
     <Compile Include="TabelaTipDokumentaRepozitoriju.cs" />
     <Compile Include="TipDokumentaKlasa.cs" />
+    <Compile Include="UskladjenostZanimanjaKlasa.cs" />
     <Compile Include="ZahtevZaRegistracijuKlasa.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

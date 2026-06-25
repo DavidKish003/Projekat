@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web.Hosting;
 using System.Web.Http;
 using System.Xml.Linq;
-using KonkursiZaPosaoServis.Models;
+using KlasePodataka;
 
 namespace KonkursiZaPosaoServis.Controllers
 {
@@ -17,7 +17,7 @@ namespace KonkursiZaPosaoServis.Controllers
         {
             try
             {
-                List<UskladjenostZanimanjaModel> uskladjenosti =
+                List<UskladjenostZanimanjaKlasa> uskladjenosti =
                     UcitajUskladjenostiIzXml();
 
                 return Ok(
@@ -78,10 +78,10 @@ namespace KonkursiZaPosaoServis.Controllers
         {
             try
             {
-                List<UskladjenostZanimanjaModel> uskladjenosti =
+                List<UskladjenostZanimanjaKlasa> uskladjenosti =
                     UcitajUskladjenostiIzXml();
 
-                IEnumerable<UskladjenostZanimanjaModel> rezultat =
+                IEnumerable<UskladjenostZanimanjaKlasa> rezultat =
                     uskladjenosti;
 
                 if (!string.IsNullOrWhiteSpace(zanimanje))
@@ -181,7 +181,7 @@ namespace KonkursiZaPosaoServis.Controllers
             }
         }
 
-        private List<UskladjenostZanimanjaModel> UcitajUskladjenostiIzXml()
+        private List<UskladjenostZanimanjaKlasa> UcitajUskladjenostiIzXml()
         {
             string putanjaDoXmlFajla =
                 @"C:\Users\Korisnik\Desktop\seminarski\Rad\3_SlojServisa\WebServis\KadrovskiPodaci\KadrovskiPodaci\XML\OgranicenjaSistematizacije.XML";
@@ -204,8 +204,8 @@ namespace KonkursiZaPosaoServis.Controllers
                     "UskladjenostZanimanja"
                 );
 
-            List<UskladjenostZanimanjaModel> uskladjenosti =
-                new List<UskladjenostZanimanjaModel>();
+            List<UskladjenostZanimanjaKlasa> uskladjenosti =
+                new List<UskladjenostZanimanjaKlasa>();
 
             foreach (XElement element in elementi)
             {
@@ -236,7 +236,7 @@ namespace KonkursiZaPosaoServis.Controllers
                 }
 
                 uskladjenosti.Add(
-                    new UskladjenostZanimanjaModel
+                    new UskladjenostZanimanjaKlasa
                     {
                         Zanimanje = zanimanje,
                         RadnoMesto = radnoMesto

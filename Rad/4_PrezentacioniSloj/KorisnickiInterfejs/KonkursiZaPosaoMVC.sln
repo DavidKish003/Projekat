@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KadrovskiPodaci", "..\..\3_
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KonkursiZaPosaoMVC", "KonkursiZaPosaoMVC\KonkursiZaPosaoMVC.csproj", "{E4D03DF3-EDB1-4281-92B7-3291F0D0FFB8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PoslovnaLogika", "..\..\2_SlojPoslovneLogike\PoslovnaLogika\PoslovnaLogika\PoslovnaLogika.csproj", "{6E1E6C15-41E1-4AF7-AA73-B88A86A7FECF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{E4D03DF3-EDB1-4281-92B7-3291F0D0FFB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4D03DF3-EDB1-4281-92B7-3291F0D0FFB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E4D03DF3-EDB1-4281-92B7-3291F0D0FFB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E1E6C15-41E1-4AF7-AA73-B88A86A7FECF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E1E6C15-41E1-4AF7-AA73-B88A86A7FECF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E1E6C15-41E1-4AF7-AA73-B88A86A7FECF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E1E6C15-41E1-4AF7-AA73-B88A86A7FECF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

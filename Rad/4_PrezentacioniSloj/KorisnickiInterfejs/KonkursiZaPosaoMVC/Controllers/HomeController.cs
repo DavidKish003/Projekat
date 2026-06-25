@@ -13,12 +13,13 @@ namespace KonkursiZaPosaoMVC.Controllers
                  return View();
             }
 
-            public ActionResult About()
+            public ActionResult Onama
+            ()
             {
                 return View();
             }
 
-            public ActionResult Contact()
+            public ActionResult Kontakt()
             {
                 return View();
             }

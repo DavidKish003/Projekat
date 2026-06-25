@@ -5,20 +5,89 @@ using System.IO;
 using System.Linq;
 using System.Web.Mvc;
 using System.Xml.Linq;
+using System.Configuration;
+using System.Web.Hosting;
 using KlasePodataka;
 using PrezentacionaLogika;
-
 using Datoteka = System.IO.File;
 
 namespace KonkursiZaPosaoMVC.Controllers
 {
     public class ZahtevController : Controller
     {
-        private readonly string stringKonekcije =
-            @"Data Source=.;Initial Catalog=KonkursiZaPosao;Integrated Security=True";
+        private readonly string stringKonekcije;
 
-        private readonly string putanjaDoOgranicenja =
-            @"C:\Users\Korisnik\Desktop\seminarski\Rad\3_SlojServisa\WebServis\KadrovskiPodaci\KadrovskiPodaci\XML\OgranicenjaSistematizacije.XML";
+        public ZahtevController()
+        {
+            stringKonekcije =
+                DajStringKonekcije();
+        }
+
+        private string DajStringKonekcije()
+        {
+            ConnectionStringSettings podesavanjeKonekcije =
+                ConfigurationManager.ConnectionStrings["Konekcija"];
+
+            if (podesavanjeKonekcije == null ||
+                string.IsNullOrWhiteSpace(podesavanjeKonekcije.ConnectionString))
+            {
+                throw new ConfigurationErrorsException(
+                    "U Web.config nije podešen connection string sa imenom Konekcija."
+                );
+            }
+
+            return podesavanjeKonekcije.ConnectionString;
+        }
+
+        private string DajPutanjuDoOgranicenja()
+        {
+            string putanja =
+                ConfigurationManager.AppSettings["PutanjaDoOgranicenjaSistematizacije"];
+
+            if (string.IsNullOrWhiteSpace(putanja))
+            {
+                throw new ConfigurationErrorsException(
+                    "U Web.config nije podešena vrednost PutanjaDoOgranicenjaSistematizacije."
+                );
+            }
+
+            if (Path.IsPathRooted(putanja))
+            {
+                return putanja;
+            }
+
+            if (putanja.StartsWith("~"))
+            {
+                string mapiranaPutanja =
+                    HostingEnvironment.MapPath(putanja);
+
+                if (string.IsNullOrWhiteSpace(mapiranaPutanja))
+                {
+                    throw new ConfigurationErrorsException(
+                        "Nije moguće mapirati virtuelnu putanju: " +
+                        putanja
+                    );
+                }
+
+                return mapiranaPutanja;
+            }
+
+            string korenAplikacije =
+                HostingEnvironment.ApplicationPhysicalPath;
+
+            if (string.IsNullOrWhiteSpace(korenAplikacije))
+            {
+                korenAplikacije =
+                    AppDomain.CurrentDomain.BaseDirectory;
+            }
+
+            return Path.GetFullPath(
+                Path.Combine(
+                    korenAplikacije,
+                    putanja
+                )
+            );
+        }
 
         private class UskladjenostZanimanja
         {
@@ -799,6 +868,9 @@ namespace KonkursiZaPosaoMVC.Controllers
 
         private List<UskladjenostZanimanja> UcitajUskladjenostiIzXml()
         {
+            string putanjaDoOgranicenja =
+                DajPutanjuDoOgranicenja();
+
             if (!Datoteka.Exists(putanjaDoOgranicenja))
             {
                 throw new FileNotFoundException(
@@ -1062,7 +1134,7 @@ namespace KonkursiZaPosaoMVC.Controllers
         }
 
         private ZahtevViewModel KreirajModelZaPrikazZahteva(
-            DataRow red)
+     DataRow red)
         {
             ZahtevViewModel modelZaPrikaz =
                 new ZahtevViewModel
@@ -1091,10 +1163,34 @@ namespace KonkursiZaPosaoMVC.Controllers
                             "KontaktTelefon"
                         ),
 
+                    PoslednjaSkola =
+                        ProcitajString(
+                            red,
+                            "PoslednjaSkola"
+                        ),
+
+                    MestoSkole =
+                        ProcitajString(
+                            red,
+                            "MestoSkole"
+                        ),
+
+                    Zanimanje =
+                        ProcitajString(
+                            red,
+                            "Zanimanje"
+                        ),
+
                     NazivKonkursa =
                         ProcitajString(
                             red,
                             "NazivKonkursa"
+                        ),
+
+                    RadnoMesto =
+                        ProcitajString(
+                            red,
+                            "RadnoMesto"
                         ),
 
                     StepenObrazovanja =

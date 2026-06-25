@@ -16,7 +16,7 @@ namespace DBUtils
           Collaboration - zavisi od standardne klase SQlDataAdapter iz biblioteke System.Data.SqlClient
                           kao i klase Dataset iz standardne biblioteke System.Data*/
 
-        #region Atributi
+
 
         private string _nazivTabele;
         private KonekcijaKlasa _konekcijaObjekat;
@@ -25,7 +25,7 @@ namespace DBUtils
         
         #endregion
 
-        #region Konstruktor
+
 
         public TabelaKlasa(KonekcijaKlasa novaKonekcija, string noviNazivTabele)
         {
@@ -35,7 +35,7 @@ namespace DBUtils
         
         #endregion
 
-        #region Privatne metode
+
 
         private void KreirajAdapter(string selectUpit, string insertUpit, string deleteUpit, string updateUpit)
         {
@@ -79,7 +79,6 @@ namespace DBUtils
         
         #endregion
 
-        #region Javne metode
 
         public DataSet DajPodatke(string selectUpit)
             // izdvaja podatke u odnosu na dat selectupit
